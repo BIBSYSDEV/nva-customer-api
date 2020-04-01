@@ -1,0 +1,3 @@
+rootProject.name = 'nva-customer-api'
+include 'customer-commons'
+
