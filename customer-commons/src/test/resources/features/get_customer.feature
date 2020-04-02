@@ -1,7 +1,7 @@
 Feature: Get Customer
 
-  Scenario Outline: The User requests a Customer
-    Given that the User has a valid <Customer UUID>
+  Scenario Outline: The Administrator requests a Customer
+    Given that the Administrator has a valid <Customer UUID>
     When they set the Accept header to "application/json"
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 200
@@ -25,8 +25,8 @@ Feature: Get Customer
       | 84c28180-6cb3-4512-9674-55b3e426bf7e |
       | 40fd8244-9601-414c-b24c-47acecba501a |
 
-  Scenario: The User requests a Customer that does not exist
-    Given that the User has an invalid <Customer UUID>
+  Scenario: The Administrator requests a Customer that does not exist
+    Given that the Administrator has an invalid <Customer UUID>
     When they set the Accept header to "application/json"
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 404
@@ -36,7 +36,7 @@ Feature: Get Customer
     And they see the response body has a field "status" with the value "404"
 
   Scenario: The persistence service is unavailable
-    Given that the User requests a Customer but the persistence service i unavailable
+    Given that the Administrator requests a Customer but the persistence service i unavailable
     When they set the Accept header to "application/json"
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 502
@@ -46,8 +46,8 @@ Feature: Get Customer
     And they see the response body has a field "status" with the value "502"
     And they see the response body has a field "detail" with the value "Persistence service is unavailable"
 
-  Scenario Outline: The User requests a badly formatted Customer UUID
-    Given that the User has a badly formatted <Customer UUID>
+  Scenario Outline: The Administrator requests a badly formatted Customer UUID
+    Given that the Administrator has a badly formatted <Customer UUID>
     When they set the Accept header to "application/json"
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 400

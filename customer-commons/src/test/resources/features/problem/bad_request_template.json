@@ -1,5 +1,0 @@
-{
-  "title": "Bad request",
-  "status": 400,
-  "detail": "%s"
-}
