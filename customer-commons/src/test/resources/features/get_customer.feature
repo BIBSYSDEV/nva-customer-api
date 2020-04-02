@@ -3,6 +3,7 @@ Feature: Get Customer
   Scenario Outline: The Administrator requests a Customer
     Given that the Administrator has a valid <Customer UUID>
     When they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 200
     And they see that the response Content-Type header is "application/json"
@@ -28,6 +29,7 @@ Feature: Get Customer
   Scenario: The Administrator requests a Customer that does not exist
     Given that the Administrator has an invalid <Customer UUID>
     When they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 404
     And they see that the response Content-Type header is "application/problem+json"
@@ -38,6 +40,7 @@ Feature: Get Customer
   Scenario: The persistence service is unavailable
     Given that the Administrator requests a Customer but the persistence service i unavailable
     When they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 502
     And they see that the response Content-Type header is "application/problem+json"
@@ -49,6 +52,7 @@ Feature: Get Customer
   Scenario Outline: The Administrator requests a badly formatted Customer UUID
     Given that the Administrator has a badly formatted <Customer UUID>
     When they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 400
     And they see that the response Content-Type header is "application/problem+json"

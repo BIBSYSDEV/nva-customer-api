@@ -3,6 +3,7 @@ Feature: Get all Customers
   Scenario: The Administrator requests all Customers
     Given that the Administrator is looking for all Customers
     When they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer
     Then they receive a response with status code 200
     And they see that the response Content-Type header is "application/json"
@@ -12,6 +13,7 @@ Feature: Get all Customers
     Given that the Administrator is looking for all Customers
     And no Customers exist
     When they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer
     Then they receive a response with status code 200
     And they see that the response Content-Type header is "application/json"
@@ -21,6 +23,7 @@ Feature: Get all Customers
     Given that the Administrator is looking for all Customer
     And the persistence service i unavailable
     When they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer
     Then they receive a response with status code 502
     And they see that the response Content-Type header is "application/problem+json"

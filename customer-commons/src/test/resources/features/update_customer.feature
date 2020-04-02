@@ -4,7 +4,7 @@ Feature: Update an existing Customer
     Given the Administrator wants to update an existing Customer and has a valid <Customer UUID>
     When they set the Content-Type header to "application/json"
     And they set the Accept header to "application/json"
-    And they set the Authentication header to "Bearer <credentials>"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they set the request body to a JSON object describing the Customer
     And they request PUT /customer/<Customer UUUID>
     Then they receive a response with status code 200
@@ -15,7 +15,7 @@ Feature: Update an existing Customer
     Given the User wants to update an existing Customer and has valid <Customer UUID>
     When they set the Content-Type header to "application/json"
     And they set the Accept header to "application/json"
-    And they set the Authentication header to "Bearer <credentials>"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they set the request body to a JSON object describing the Customer
     And they request PUT /customer/<Customer UUUID>
     Then they receive a response with status code 401
@@ -27,7 +27,9 @@ Feature: Update an existing Customer
   Scenario: The persistence service is unavailable
     Given the Administrator wants to update an existing Customer and has a valid <Customer UUID>
     And the persistence service i unavailable
-    When they set the Accept header to "application/json"
+    When they set the Content-Type header to "application/json"
+    And they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 502
     And they see that the response Content-Type header is "application/problem+json"
@@ -40,7 +42,7 @@ Feature: Update an existing Customer
     Given the Administrator wants to update an existing Customer and has a valid <Customer UUID>
     When they set the Content-Type header to "application/json"
     And they set the Accept header to "application/json"
-    And they set the Authentication header to "Bearer <credentials>"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they set the request body to a JSON object describing the malformed Customer
     And they request POST /customer
     Then they receive a response with status code 400
@@ -51,7 +53,9 @@ Feature: Update an existing Customer
 
   Scenario Outline: The Administrator requests a badly formatted Customer UUID
     Given that the Administrator has a badly formatted <Customer UUID>
-    When they set the Accept header to "application/json"
+    When they set the Content-Type header to "application/json"
+    And they set the Accept header to "application/json"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they request GET /customer/<Customer UUID>
     Then they receive a response with status code 400
     And they see that the response Content-Type header is "application/problem+json"

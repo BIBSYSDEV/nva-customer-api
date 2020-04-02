@@ -4,7 +4,7 @@ Feature: Create a new Customer
     Given the Administrator wants to create a new Customer
     When they set the Content-Type header to "application/json"
     And they set the Accept header to "application/json"
-    And they set the Authentication header to "Bearer <credentials>"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they set the request body to a JSON object describing the Customer
     And they request POST /customer
     Then they receive a response with status code 201
@@ -16,7 +16,7 @@ Feature: Create a new Customer
     Given the User wants to create a new Customer
     When they set the Content-Type header to "application/json"
     And they set the Accept header to "application/json"
-    And they set the Authentication header to "Bearer <credentials>"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they set the request body to a JSON object describing the Customer
     And they request POST /customer
     Then they receive a response with status code 401
@@ -29,7 +29,7 @@ Feature: Create a new Customer
     Given the Administrator wants to create a new malformed Customer
     When they set the Content-Type header to "application/json"
     And they set the Accept header to "application/json"
-    And they set the Authentication header to "Bearer <credentials>"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they set the request body to a JSON object describing the malformed Customer
     And they request POST /customer
     Then they receive a response with status code 400
@@ -43,7 +43,7 @@ Feature: Create a new Customer
     And the persistence service is unavailable
     When they set the Content-Type header to "application/json"
     And they set the Accept header to "application/json"
-    And they set the Authentication header to "Bearer <credentials>"
+    And they set the Authentication header to a Bearer token with their <credentials>
     And they set the request body to a JSON object describing the Customer
     And they request POST /customer/
     Then they receive a response with status code 502
