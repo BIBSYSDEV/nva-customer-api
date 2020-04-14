@@ -3,6 +3,7 @@ package no.unit.nva.customer.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
+import nva.commons.utils.JsonUtils;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -12,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapperConfig().createObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper;
 
     @Test
     public void customerMappedToJsonAndBack() throws JsonProcessingException {

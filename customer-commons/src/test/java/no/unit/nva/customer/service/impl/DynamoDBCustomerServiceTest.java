@@ -14,6 +14,7 @@ import no.unit.nva.customer.exception.NotFoundException;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import nva.commons.utils.Environment;
+import nva.commons.utils.JsonUtils;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +39,7 @@ public class DynamoDBCustomerServiceTest {
     @Rule
     public CustomerDynamoDBLocal db =  new CustomerDynamoDBLocal();
 
-    private ObjectMapper objectMapper = ObjectMapperConfig.createObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper;
     private DynamoDBCustomerService service;
     private Environment environment;
     private AmazonDynamoDB client;
