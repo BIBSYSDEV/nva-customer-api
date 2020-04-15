@@ -28,7 +28,6 @@ subprojects {
 
     dependencies {
         implementation group: 'com.github.BIBSYSDEV', name: 'nva-commons', version: 'v0.1.4'
-        implementation group: 'io.mikael', name: 'urlbuilder', version: '2.0.9'
         implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
         implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
