@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AWS
+
+  Sample SAM Template for AWS
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: NvaCustomerApi
+    Description: NVA Customer API
+    Author: Unit
+    SpdxLicenseId: MIT
+    LicenseUrl: LICENSE
+
+Globals:
+  Function:
+    Timeout: 20
+  Api:
+    Cors:
+      AllowMethods: "'POST, PUT, GET,OPTIONS'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+
+Parameters:
+  CognitoAuthorizerArn:
+    Type: String
+    Description: Reference to Cognito UserPool for the stage
+  CustomDomain:
+    Type: String
+    Description: Custom API to connect this lambda to
+  CustomDomainBasePath:
+    Type: String
+    Description: Base path mapping in CustomDomain
+  CustomerTableName:
+    Type: String
+    Description: Reference to table containing Customers
+
+Resources:
+  NvaCustomerApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      EndpointConfiguration: REGIONAL
+      DefinitionBody:
+        swagger: '2.0'
+        info:
+          title: NVA Customer API
+          version: '1.0'
+        paths:
+          /:
+            post:
+              summary: Create Customer
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              security:
+                - CognitoUserPool: []
+              parameters:
+                - in: body
+                  name: customer
+                  description: The Customer to create.
+                  schema:
+                    $ref: '#/definitions/Customer'
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaCreateCustomerFunction.Arn}/invocations
+                responses: {}
+                httpMethod: POST
+                type: AWS_PROXY
+              responses:
+                '201':
+                  description: Created
+                  schema:
+                    $ref: '#/definitions/Customer'
+                '400':
+                  description: Bad Request
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '404':
+                  description: Not Found
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '502':
+                  description: Bad Gateway
+                  schema:
+                    $ref: '#/definitions/Problem'
+        definitions:
+          Customer:
+            type: object
+            properties:
+              identifier:
+                type: string
+                format: uuid
+              type:
+                type: string
+              createdDate:
+                type: string
+                format: date-time
+              modifiedDate:
+                type: string
+                format: date-time
+              name:
+                type: string
+              displayName:
+                type: string
+              shortName:
+                type: string
+              archiveName:
+                type: string
+              cname:
+                type: string
+              institutionDns:
+                type: string
+              administrationId:
+                type: string
+                format: email
+              feideOrganizationId:
+                type: string
+          Problem:
+            type: object
+            properties:
+              title:
+                type: string
+              status:
+                type: integer
+              detail:
+                type: string
+        securityDefinitions:
+          CognitoUserPool:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: cognito_user_pools
+            x-amazon-apigateway-authorizer:
+              type: cognito_user_pools
+              providerARNs:
+                - !Ref CognitoAuthorizerArn
+  NvaCreateCustomerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: create-customer
+      Handler: no.unit.nva.customer.create.CreateCustomerHandler::handleRequest
+      Runtime: java11
+      MemorySize: 1400
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: '*'
+          TABLE_NAME: !Ref CustomerTableName
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
+            RestApiId: !Ref NvaCustomerApi
+  NvaCustomerBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      BasePath: !Ref CustomDomainBasePath
+      DomainName: !Ref CustomDomain
+      RestApiId: !Ref NvaCustomerApi
+      Stage: !Ref NvaCustomerApi.Stage

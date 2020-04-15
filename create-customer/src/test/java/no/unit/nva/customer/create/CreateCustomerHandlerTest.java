@@ -27,6 +27,9 @@ import static org.mockito.Mockito.when;
 
 public class CreateCustomerHandlerTest {
 
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String WILDCARD = "*";
+
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerService;
     private Environment environment;
@@ -71,14 +74,14 @@ public class CreateCustomerHandlerTest {
 
     private Map<String, Object> getRequestHeaders() {
         return Map.of(
-                CONTENT_TYPE, "application/json",
-                ACCEPT, "application/json");
+                CONTENT_TYPE, APPLICATION_JSON,
+                ACCEPT, APPLICATION_JSON);
     }
 
     private Map<String, String> getResponseHeaders() {
         return Map.of(
-                CONTENT_TYPE, "application/json",
-                ACCESS_CONTROL_ALLOW_ORIGIN, "*"
+                CONTENT_TYPE, APPLICATION_JSON,
+                ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD
         );
     }
 
