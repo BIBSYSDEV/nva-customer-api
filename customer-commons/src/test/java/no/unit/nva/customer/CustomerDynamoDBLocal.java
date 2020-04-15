@@ -30,7 +30,7 @@ public class CustomerDynamoDBLocal extends ExternalResource {
     protected void before() throws Throwable {
         super.before();
         ddb = DynamoDBEmbedded.create().amazonDynamoDB();
-        createPublicationsTable(ddb);
+        createCustomerTable(ddb);
         client = new DynamoDB(ddb);
     }
 
@@ -38,7 +38,7 @@ public class CustomerDynamoDBLocal extends ExternalResource {
         return client.getTable(NVA_CUSTOMERS_TABLE_NAME);
     }
 
-    private CreateTableResult createPublicationsTable(AmazonDynamoDB ddb) {
+    private CreateTableResult createCustomerTable(AmazonDynamoDB ddb) {
         List<AttributeDefinition> attributeDefinitions = Arrays.asList(
                 new AttributeDefinition(IDENTIFIER, S)
         );
