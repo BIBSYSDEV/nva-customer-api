@@ -3,7 +3,6 @@ package no.unit.nva.customer.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
-import nva.commons.utils.JsonUtils;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

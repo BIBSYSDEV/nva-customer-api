@@ -25,11 +25,11 @@ import java.util.UUID;
 public class DynamoDBCustomerService implements CustomerService {
 
     public static final String TABLE_NAME = "TABLE_NAME";
-    public static final String ERROR_MAPPING_ITEM_TO_CUSTOMER = "Error mapping Item to Customer: ";
-    public static final String ERROR_MAPPING_CUSTOMER_TO_ITEM = "Error mapping Customer to Item: ";
-    public static final String ERROR_WRITING_ITEM_TO_TABLE = "Error writing Item to Table: ";
+    public static final String ERROR_MAPPING_ITEM_TO_CUSTOMER = "Error mapping Item to Customer";
+    public static final String ERROR_MAPPING_CUSTOMER_TO_ITEM = "Error mapping Customer to Item";
+    public static final String ERROR_WRITING_ITEM_TO_TABLE = "Error writing Item to Table";
     public static final String CUSTOMER_NOT_FOUND = "Customer not found: ";
-    public static final String ERROR_READING_FROM_TABLE = "Error reading from Table: ";
+    public static final String ERROR_READING_FROM_TABLE = "Error reading from Table";
 
     private final Table table;
     private final ObjectMapper objectMapper;
@@ -60,8 +60,7 @@ public class DynamoDBCustomerService implements CustomerService {
         try {
             item = table.getItem(Customer.IDENTIFIER, identifier.toString());
         } catch (Exception e) {
-            logError(e);
-            throw new DynamoDBException(ERROR_READING_FROM_TABLE + e.getMessage());
+            throw new DynamoDBException(ERROR_READING_FROM_TABLE, e);
         }
         if (item == null) {
             throw new NotFoundException(CUSTOMER_NOT_FOUND + identifier.toString());
@@ -75,8 +74,7 @@ public class DynamoDBCustomerService implements CustomerService {
         try {
             scan = table.scan();
         } catch (Exception e) {
-            logError(e);
-            throw new DynamoDBException(ERROR_READING_FROM_TABLE + e.getMessage());
+            throw new DynamoDBException(ERROR_READING_FROM_TABLE, e);
         }
         return scanToCustomers(scan);
     }
@@ -97,8 +95,7 @@ public class DynamoDBCustomerService implements CustomerService {
             customer.setIdentifier(identifier);
             table.putItem(customerToItem(customer));
         } catch (Exception e) {
-            logError(e);
-            throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE + e.getMessage());
+            throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE, e);
         }
         return getCustomer(identifier);
     }
@@ -110,8 +107,7 @@ public class DynamoDBCustomerService implements CustomerService {
             Item item = customerToItem(customer);
             table.putItem(item);
         } catch (Exception e) {
-            logError(e);
-            throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE + e.getMessage());
+            throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE, e);
         }
         return getCustomer(identifier);
     }
@@ -121,8 +117,7 @@ public class DynamoDBCustomerService implements CustomerService {
         try {
             item = Item.fromJSON(objectMapper.writeValueAsString(customer));
         } catch (JsonProcessingException e) {
-            logError(e);
-            throw new InputException(ERROR_MAPPING_CUSTOMER_TO_ITEM + e.getMessage());
+            throw new InputException(ERROR_MAPPING_CUSTOMER_TO_ITEM, e);
         }
         return item;
     }
@@ -132,8 +127,7 @@ public class DynamoDBCustomerService implements CustomerService {
         try {
             customerOutcome = objectMapper.readValue(item.toJSON(), Customer.class);
         } catch (Exception e) {
-            logError(e);
-            throw new DynamoDBException(ERROR_MAPPING_ITEM_TO_CUSTOMER + e.getMessage());
+            throw new DynamoDBException(ERROR_MAPPING_ITEM_TO_CUSTOMER, e);
         }
         return customerOutcome;
     }

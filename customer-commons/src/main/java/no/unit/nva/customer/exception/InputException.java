@@ -4,8 +4,8 @@ import nva.commons.exceptions.ApiGatewayException;
 
 public class InputException extends ApiGatewayException {
 
-    public InputException(String message) {
-        super(message);
+    public InputException(String message, Exception exception) {
+        super(exception, message);
     }
 
     @Override

@@ -16,8 +16,4 @@ public interface CustomerService {
 
     Customer updateCustomer(UUID identifier, Customer customer) throws ApiGatewayException;
 
-    default void logError(Exception e) {
-        e.printStackTrace();
-    }
-
 }

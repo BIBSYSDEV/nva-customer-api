@@ -4,8 +4,8 @@ import nva.commons.exceptions.ApiGatewayException;
 
 public class DynamoDBException extends ApiGatewayException {
 
-    public DynamoDBException(String message) {
-        super(message);
+    public DynamoDBException(String message, Exception exception) {
+        super(exception, message);
     }
 
     @Override
