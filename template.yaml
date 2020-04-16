@@ -86,6 +86,45 @@ Resources:
                   description: Bad Gateway
                   schema:
                     $ref: '#/definitions/Problem'
+          /{identifier}:
+            get:
+              summary: Get Customer
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              security:
+                - CognitoUserPool: []
+              parameters:
+                - in: path
+                  name: identifier
+                  type: string
+                  format: uuid
+                  required: true
+                  description: UUID identifier of the Customer to get.
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerFunction.Arn}/invocations
+                responses: {}
+                httpMethod: POST
+                type: AWS_PROXY
+              responses:
+                '200':
+                  description: OK
+                  schema:
+                    $ref: '#/definitions/Customer'
+                '400':
+                  description: Bad Request
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '404':
+                  description: Not Found
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '502':
+                  description: Bad Gateway
+                  schema:
+                    $ref: '#/definitions/Problem'
         definitions:
           Customer:
             type: object
@@ -149,11 +188,29 @@ Resources:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
       Events:
-        GetEvent:
+        PostEvent:
           Type: Api
           Properties:
             Path: /
             Method: post
+            RestApiId: !Ref NvaCustomerApi
+  NvaGetCustomerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get-customer
+      Handler: no.unit.nva.customer.get.GetCustomerHandler::handleRequest
+      Runtime: java11
+      MemorySize: 1400
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: '*'
+          TABLE_NAME: !Ref CustomersTableName
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /{identifier}
+            Method: get
             RestApiId: !Ref NvaCustomerApi
   NvaCustomerBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
