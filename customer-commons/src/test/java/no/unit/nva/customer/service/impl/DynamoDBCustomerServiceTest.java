@@ -23,6 +23,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_MAPPING_CUSTOMER_TO_ITEM;
+import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_MAPPING_ITEM_TO_CUSTOMER;
+import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_READING_FROM_TABLE;
+import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_WRITING_ITEM_TO_TABLE;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.TABLE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -59,9 +63,9 @@ public class DynamoDBCustomerServiceTest {
     }
 
     @Test
-    public void testConstructor() {
+    public void testConstructorThrowsNoExceptions() {
         when(environment.readEnv(TABLE_NAME)).thenReturn(NVA_CUSTOMERS_TEST);
-        CustomerService serviceWithTableNameFromEnv = new DynamoDBCustomerService(client, objectMapper, environment);;
+        CustomerService serviceWithTableNameFromEnv = new DynamoDBCustomerService(client, objectMapper, environment);
         assertNotNull(serviceWithTableNameFromEnv);
     }
 
@@ -137,9 +141,9 @@ public class DynamoDBCustomerServiceTest {
                 objectMapper,
                 failingTable
         );
-        assertThrows(DynamoDBException.class,
+        DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.getCustomer(UUID.randomUUID()));
-
+        assertEquals(ERROR_READING_FROM_TABLE, exception.getMessage());
     }
 
     @Test
@@ -150,9 +154,9 @@ public class DynamoDBCustomerServiceTest {
                 objectMapper,
                 failingTable
         );
-        assertThrows(DynamoDBException.class,
-            () -> failingService.getCustomers());
-
+        DynamoDBException exception = assertThrows(DynamoDBException.class,
+            () -> failingService.getCustomers());   
+        assertEquals(ERROR_READING_FROM_TABLE, exception.getMessage());
     }
 
     @Test
@@ -163,8 +167,9 @@ public class DynamoDBCustomerServiceTest {
                 objectMapper,
                 failingTable
         );
-        assertThrows(DynamoDBException.class,
+        DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.createCustomer(getNewCustomer()));
+        assertEquals(ERROR_WRITING_ITEM_TO_TABLE, exception.getMessage());
 
     }
 
@@ -178,31 +183,32 @@ public class DynamoDBCustomerServiceTest {
         );
         Customer customer = getNewCustomer();
         customer.setIdentifier(UUID.randomUUID());
-        assertThrows(DynamoDBException.class,
+        DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.updateCustomer(customer.getIdentifier(), customer));
-
+        assertEquals(ERROR_WRITING_ITEM_TO_TABLE, exception.getMessage());
     }
 
     @Test
-    public void customerToItemThrowsException() throws JsonProcessingException {
+    public void customerToItemThrowsExceptionWhenInvalidJson() throws JsonProcessingException {
         ObjectMapper failingObjectMapper = mock(ObjectMapper.class);
         when(failingObjectMapper.writeValueAsString(any(Customer.class))).thenThrow(JsonProcessingException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 failingObjectMapper,
                 db.getTable()
         );
-        assertThrows(InputException.class,
-            () -> failingService.customerToItem(getNewCustomer()),
-            DynamoDBCustomerService.ERROR_MAPPING_CUSTOMER_TO_ITEM + "N/A");
+        InputException exception = assertThrows(InputException.class,
+            () -> failingService.customerToItem(getNewCustomer()));
+        assertEquals(ERROR_MAPPING_CUSTOMER_TO_ITEM, exception.getMessage());
     }
 
     @Test
-    public void itemToCustomerThrowsException() {
+    public void itemToCustomerThrowsExceptionWhenInvalidJson() {
         Item item = mock(Item.class);
         when(item.toJSON()).thenThrow(new IllegalStateException());
-        assertThrows(DynamoDBException.class,
-            () -> service.itemToCustomer(item),
-            DynamoDBCustomerService.ERROR_MAPPING_ITEM_TO_CUSTOMER + "null");
+        DynamoDBException exception = assertThrows(DynamoDBException.class,
+            () -> service.itemToCustomer(item));
+        assertEquals(ERROR_MAPPING_ITEM_TO_CUSTOMER, exception.getMessage());
+
     }
 
     private Customer getNewCustomer() {
