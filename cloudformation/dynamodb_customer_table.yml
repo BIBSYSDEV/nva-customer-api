@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Persisting NVA Customers.
+
+Parameters:
+  NvaCustomersTableName:
+    Description: Name to use for table persisting NVA Customers.
+    Type: String
+    Default: nva_customers
+
+Resources:
+  NvaCustomersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref NvaCustomersTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: identifier
+          AttributeType: S
+      KeySchema:
+        - AttributeName: identifier
+          KeyType: HASH
+
+Outputs:
+  NvaCustomersTableOutput:
+    Description: NVA Customers table name.
+    Value: !Ref NvaCustomersTable
