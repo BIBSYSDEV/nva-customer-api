@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
-import no.unit.nva.testutils.TestContext;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
+import nva.commons.utils.TestContext;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -77,7 +77,14 @@ public class CreateCustomerHandlerTest {
             HttpStatus.SC_CREATED
         );
 
-        assertEquals(expected, actual);
+        compareGatewayRequests(expected, actual);
+    }
+
+    private void compareGatewayRequests(GatewayResponse<Customer> expected, GatewayResponse<Customer> actual)
+            throws JsonProcessingException {
+        assertEquals(expected.getStatusCode(), actual.getStatusCode());
+        assertEquals(expected.getHeaders(), actual.getHeaders());
+        assertEquals(expected.getBodyObject(Customer.class), actual.getBodyObject(Customer.class));
     }
 
     private Map<String, Object> getRequestHeaders() {
