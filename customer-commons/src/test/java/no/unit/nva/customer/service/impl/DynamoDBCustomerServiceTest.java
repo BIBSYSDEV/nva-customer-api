@@ -155,7 +155,7 @@ public class DynamoDBCustomerServiceTest {
                 failingTable
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
-            () -> failingService.getCustomers());
+            () -> failingService.getCustomers());   
         assertEquals(ERROR_READING_FROM_TABLE, exception.getMessage());
     }
 
@@ -189,7 +189,7 @@ public class DynamoDBCustomerServiceTest {
     }
 
     @Test
-    public void customerToItemThrowsException() throws JsonProcessingException {
+    public void customerToItemThrowsExceptionWhenInvalidJson() throws JsonProcessingException {
         ObjectMapper failingObjectMapper = mock(ObjectMapper.class);
         when(failingObjectMapper.writeValueAsString(any(Customer.class))).thenThrow(JsonProcessingException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
@@ -202,7 +202,7 @@ public class DynamoDBCustomerServiceTest {
     }
 
     @Test
-    public void itemToCustomerThrowsException() {
+    public void itemToCustomerThrowsExceptionWhenInvalidJson() {
         Item item = mock(Item.class);
         when(item.toJSON()).thenThrow(new IllegalStateException());
         DynamoDBException exception = assertThrows(DynamoDBException.class,
