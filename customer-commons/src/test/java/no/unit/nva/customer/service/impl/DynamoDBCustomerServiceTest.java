@@ -15,7 +15,6 @@ import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import nva.commons.utils.Environment;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
@@ -24,6 +23,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.TABLE_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,62 +60,77 @@ public class DynamoDBCustomerServiceTest {
 
     @Test
     public void testConstructor() {
-        when(environment.readEnv(DynamoDBCustomerService.TABLE_NAME)).thenReturn(NVA_CUSTOMERS_TEST);
+        when(environment.readEnv(TABLE_NAME)).thenReturn(NVA_CUSTOMERS_TEST);
         CustomerService serviceWithTableNameFromEnv = new DynamoDBCustomerService(client, objectMapper, environment);;
         assertNotNull(serviceWithTableNameFromEnv);
     }
 
     @Test
-    public void createNewCustomer() throws Exception {
+    public void createNewCustomerReturnsTheCustomer() throws Exception {
         Customer customer = getNewCustomer();
         Customer createdCustomer = service.createCustomer(customer);
 
-        Assertions.assertNotNull(createdCustomer.getIdentifier());
-        Assertions.assertEquals(customer, createdCustomer);
+        assertNotNull(createdCustomer.getIdentifier());
+        assertEquals(customer, createdCustomer);
     }
 
     @Test
-    public void updateExistingCustomer() throws Exception {
+    public void updateExistingCustomerWithNewName() throws Exception {
         String newName = "New name";
         Customer customer = getNewCustomer();
         Customer createdCustomer = service.createCustomer(customer);
-        Assertions.assertNotEquals(newName, createdCustomer.getName());
+        assertNotEquals(newName, createdCustomer.getName());
 
         createdCustomer.setName(newName);
         Customer updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
-        Assertions.assertEquals(newName, updatedCustomer.getName());
-        Assertions.assertNotEquals(customer.getModifiedDate(), updatedCustomer.getModifiedDate());
-        Assertions.assertEquals(customer.getCreatedDate(), updatedCustomer.getCreatedDate());
-
+        assertEquals(newName, updatedCustomer.getName());
     }
 
     @Test
-    public void getExistingCustomer() throws Exception {
+    public void updateExistingCustomerChangesModifiedDate() throws Exception {
+        Customer customer = getNewCustomer();
+        Customer createdCustomer = service.createCustomer(customer);
+
+        Customer updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
+        assertNotEquals(customer.getModifiedDate(), updatedCustomer.getModifiedDate());
+    }
+
+    @Test
+    public void updateExistingCustomerPreservesCreatedDate() throws Exception {
+        Customer customer = getNewCustomer();
+        Customer createdCustomer = service.createCustomer(customer);
+
+        Customer updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
+        assertEquals(customer.getCreatedDate(), updatedCustomer.getCreatedDate());
+    }
+
+    @Test
+    public void getExistingCustomerReturnsTheCustomer() throws Exception {
         Customer customer = getNewCustomer();
         Customer createdCustomer = service.createCustomer(customer);
         Customer getCustomer = service.getCustomer(createdCustomer.getIdentifier());
-        Assertions.assertEquals(createdCustomer, getCustomer);
+        assertEquals(createdCustomer, getCustomer);
     }
 
     @Test
-    public void getAllCustomers() throws Exception {
+    public void getAllCustomersReturnsListOfCustomers() throws Exception {
         // create three customers
         service.createCustomer(getNewCustomer());
         service.createCustomer(getNewCustomer());
         service.createCustomer(getNewCustomer());
 
         List<Customer> customers = service.getCustomers();
-        Assertions.assertEquals(3, customers.size());
+        assertEquals(3, customers.size());
     }
 
     @Test
-    public void getCustomerNotFound() {
+    public void getCustomerNotFoundThrowsException() {
         UUID nonExistingCustomer = UUID.randomUUID();
         assertThrows(NotFoundException.class, () -> service.getCustomer(nonExistingCustomer));
     }
 
     @Test
-    public void getCustomerTableError() {
+    public void getCustomerTableErrorThrowsException() {
         Table failingTable = mock(Table.class);
         when(failingTable.getItem(anyString(),any())).thenThrow(RuntimeException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
@@ -126,7 +143,7 @@ public class DynamoDBCustomerServiceTest {
     }
 
     @Test
-    public void getCustomersTableError() {
+    public void getCustomersTableErrorThrowsException() {
         Table failingTable = mock(Table.class);
         when(failingTable.scan()).thenThrow(RuntimeException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
@@ -139,7 +156,7 @@ public class DynamoDBCustomerServiceTest {
     }
 
     @Test
-    public void createCustomerTableError() {
+    public void createCustomerTableErrorThrowsException() {
         Table failingTable = mock(Table.class);
         when(failingTable.putItem(any(Item.class))).thenThrow(RuntimeException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
@@ -152,7 +169,7 @@ public class DynamoDBCustomerServiceTest {
     }
 
     @Test
-    public void updateCustomerTableError() {
+    public void updateCustomerTableErrorThrowsException() {
         Table failingTable = mock(Table.class);
         when(failingTable.putItem(any(Item.class))).thenThrow(RuntimeException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(

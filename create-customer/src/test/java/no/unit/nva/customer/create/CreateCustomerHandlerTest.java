@@ -8,9 +8,10 @@ import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
-import nva.commons.utils.TestLogger;
+import nva.commons.utils.TestContext;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import static nva.commons.handlers.ApiGatewayHandler.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static nva.commons.handlers.ApiGatewayHandler.CONTENT_TYPE;
 import static org.apache.http.HttpHeaders.ACCEPT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +31,8 @@ public class CreateCustomerHandlerTest {
 
     public static final String APPLICATION_JSON = "application/json";
     public static final String WILDCARD = "*";
+    public static final String BODY = "body";
+    public static final String HEADERS = "headers";
 
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerService;
@@ -44,15 +48,15 @@ public class CreateCustomerHandlerTest {
     public void setUp() {
         customerService = mock(CustomerService.class);
         environment = mock(Environment.class);
-        when(environment.readEnv("ALLOWED_ORIGIN")).thenReturn("*");
+        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
         handler = new CreateCustomerHandler(customerService, environment);
         outputStream = new ByteArrayOutputStream();
-        context = mock(Context.class);
-        when(context.getLogger()).thenReturn(new TestLogger());
+        context = new TestContext();
     }
 
     @Test
-    public void createCustomerHandler() throws Exception {
+    @DisplayName("Request to Handler Returns Customer Created")
+    public void requestToHandlerReturnsCustomerCreated() throws Exception {
         Customer customer = new Customer.Builder()
                 .withName("New Customer")
                 .build();
@@ -67,9 +71,20 @@ public class CreateCustomerHandlerTest {
                 outputStream.toByteArray(),
                 GatewayResponse.class);
 
-        assertEquals(HttpStatus.SC_CREATED, actual.getStatusCode());
-        assertEquals(getResponseHeaders(), actual.getHeaders());
-        assertEquals(customer, actual.getBodyObject(Customer.class));
+        GatewayResponse<Customer> expected = new GatewayResponse<>(
+            customer,
+            getResponseHeaders(),
+            HttpStatus.SC_CREATED
+        );
+
+        compareGatewayRequests(expected, actual);
+    }
+
+    private void compareGatewayRequests(GatewayResponse<Customer> expected, GatewayResponse<Customer> actual)
+            throws JsonProcessingException {
+        assertEquals(expected.getStatusCode(), actual.getStatusCode());
+        assertEquals(expected.getHeaders(), actual.getHeaders());
+        assertEquals(expected.getBodyObject(Customer.class), actual.getBodyObject(Customer.class));
     }
 
     private Map<String, Object> getRequestHeaders() {
@@ -87,8 +102,8 @@ public class CreateCustomerHandlerTest {
 
     protected InputStream inputStream(Object body, Map<String,Object> headers) throws JsonProcessingException {
         Map<String,Object> request = Map.of(
-                "body", objectMapper.writeValueAsString(body),
-                "headers", headers
+                BODY, objectMapper.writeValueAsString(body),
+                HEADERS, headers
         );
         return new ByteArrayInputStream(objectMapper.writeValueAsBytes(request));
     }

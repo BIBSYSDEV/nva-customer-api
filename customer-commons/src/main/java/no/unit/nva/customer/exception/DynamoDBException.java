@@ -2,6 +2,8 @@ package no.unit.nva.customer.exception;
 
 import nva.commons.exceptions.ApiGatewayException;
 
+import static org.apache.http.HttpStatus.SC_BAD_GATEWAY;
+
 public class DynamoDBException extends ApiGatewayException {
 
     public DynamoDBException(String message, Exception exception) {
@@ -10,6 +12,6 @@ public class DynamoDBException extends ApiGatewayException {
 
     @Override
     protected Integer statusCode() {
-        return 502;
+        return SC_BAD_GATEWAY;
     }
 }
