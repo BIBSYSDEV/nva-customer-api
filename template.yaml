@@ -32,7 +32,7 @@ Parameters:
   CustomDomainBasePath:
     Type: String
     Description: Base path mapping in CustomDomain
-  CustomerTableName:
+  CustomersTableName:
     Type: String
     Description: Reference to table containing Customers
 
@@ -147,7 +147,7 @@ Resources:
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
-          TABLE_NAME: !Ref CustomerTableName
+          TABLE_NAME: !Ref CustomersTableName
       Events:
         GetEvent:
           Type: Api
