@@ -5,20 +5,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerList;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.TestContext;
-import nva.commons.handlers.ApiGatewayHandler;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -63,7 +61,7 @@ public class GetAllCustomersHandlerTest {
         Customer customer = new Customer.Builder()
                 .withIdentifier(identifier)
                 .build();
-        List<Customer> customers = List.of(customer);
+        CustomerList customers = CustomerList.of(customer);
         when(customerService.getCustomers()).thenReturn(customers);
 
         Map<String,Object> headers = getRequestHeaders();
@@ -71,11 +69,11 @@ public class GetAllCustomersHandlerTest {
 
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<Customer> actual = objectMapper.readValue(
+        GatewayResponse<CustomerList> actual = objectMapper.readValue(
                 outputStream.toByteArray(),
                 GatewayResponse.class);
 
-        GatewayResponse<Customer> expected = new GatewayResponse<>(
+        GatewayResponse<CustomerList> expected = new GatewayResponse<>(
             objectMapper.writeValueAsString(customers),
             getResponseHeaders(),
             HttpStatus.SC_OK

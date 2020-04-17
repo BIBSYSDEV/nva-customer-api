@@ -3,7 +3,7 @@ package no.unit.nva.customer.getall;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerList;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -12,11 +12,9 @@ import nva.commons.handlers.RequestInfo;
 import nva.commons.utils.Environment;
 import nva.commons.utils.JacocoGenerated;
 
-import java.util.List;
-
 import static org.apache.http.HttpStatus.SC_OK;
 
-public class GetAllCustomersHandler extends ApiGatewayHandler<String,List<Customer>> {
+public class GetAllCustomersHandler extends ApiGatewayHandler<String, CustomerList> {
 
     private final CustomerService customerService;
 
@@ -44,13 +42,13 @@ public class GetAllCustomersHandler extends ApiGatewayHandler<String,List<Custom
     }
 
     @Override
-    protected List<Customer> processInput(String input, RequestInfo requestInfo, Context context)
+    protected CustomerList processInput(String input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        return customerService.getCustomers();
+        return CustomerList.of(customerService.getCustomers());
     }
 
     @Override
-    protected Integer getSuccessStatusCode(String input, List<Customer> output) {
+    protected Integer getSuccessStatusCode(String input, CustomerList output) {
         return SC_OK;
     }
 }
