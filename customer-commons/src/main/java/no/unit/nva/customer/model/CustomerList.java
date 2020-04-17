@@ -18,7 +18,7 @@ public class CustomerList extends ArrayList<Customer> {
         return list;
     }
 
-    public static CustomerList of(Customer customers) {
+    public static CustomerList of(Customer... customers) {
         return of(List.of(customers));
     }
 
