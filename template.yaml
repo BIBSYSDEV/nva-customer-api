@@ -86,6 +86,39 @@ Resources:
                   description: Bad Gateway
                   schema:
                     $ref: '#/definitions/Problem'
+            get:
+              summary: Get All Customers
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              security:
+                - CognitoUserPool: []
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetAllCustomersFunction.Arn}/invocations
+                responses: {}
+                httpMethod: POST
+                type: AWS_PROXY
+              responses:
+                '200':
+                  description: OK
+                  schema:
+                    type: list
+                    items:
+                      $ref: '#/definitions/Customer'
+                '400':
+                  description: Bad Request
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '404':
+                  description: Not Found
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '502':
+                  description: Bad Gateway
+                  schema:
+                    $ref: '#/definitions/Problem'
           /{identifier}:
             get:
               summary: Get Customer
@@ -210,6 +243,24 @@ Resources:
           Type: Api
           Properties:
             Path: /{identifier}
+            Method: get
+            RestApiId: !Ref NvaCustomerApi
+  NvaGetAllCustomersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get-all-customers
+      Handler: no.unit.nva.customer.getall.GetAllCustomersHandler::handleRequest
+      Runtime: java11
+      MemorySize: 1400
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: '*'
+          TABLE_NAME: !Ref CustomersTableName
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /
             Method: get
             RestApiId: !Ref NvaCustomerApi
   NvaCustomerBasePathMapping:

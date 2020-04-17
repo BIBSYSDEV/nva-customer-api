@@ -10,6 +10,7 @@ import no.unit.nva.testutils.TestContext;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.zalando.problem.Problem;
@@ -28,6 +29,7 @@ import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static nva.commons.handlers.ApiGatewayHandler.CONTENT_TYPE;
 import static org.apache.http.HttpHeaders.ACCEPT;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,7 +37,6 @@ import static org.zalando.problem.Status.BAD_REQUEST;
 
 public class GetCustomerHandlerTest {
 
-    public static final String APPLICATION_JSON = "application/json";
     public static final String WILDCARD = "*";
     public static final String HEADERS = "headers";
     public static final String PATH_PARAMETERS = "pathParameters";
@@ -89,7 +90,7 @@ public class GetCustomerHandlerTest {
 
     @Test
     public void requestToHandlerWithMalformedIdentifierReturnsBadRequest() throws Exception {
-        String malformedIdentifier = "abc-123-def-456";
+        String malformedIdentifier = "for-testing";
 
         Map<String,Object> headers = getRequestHeaders();
         InputStream inputStream = inputStream(malformedIdentifier, headers);
@@ -116,13 +117,13 @@ public class GetCustomerHandlerTest {
 
     private Map<String, Object> getRequestHeaders() {
         return Map.of(
-                CONTENT_TYPE, APPLICATION_JSON,
-                ACCEPT, APPLICATION_JSON);
+                CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType(),
+                ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
     }
 
     private Map<String, String> getResponseHeaders() {
         return Map.of(
-                CONTENT_TYPE, APPLICATION_JSON,
+                CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType(),
                 ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD
         );
     }

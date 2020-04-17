@@ -1,4 +1,4 @@
-package no.unit.nva.customer.create;
+package no.unit.nva.customer.getall;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,37 +7,40 @@ import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.TestContext;
+import nva.commons.handlers.ApiGatewayHandler;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static nva.commons.handlers.ApiGatewayHandler.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
+import static nva.commons.handlers.ApiGatewayHandler.APPLICATION_PROBLEM_JSON;
 import static nva.commons.handlers.ApiGatewayHandler.CONTENT_TYPE;
 import static org.apache.http.HttpHeaders.ACCEPT;
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class CreateCustomerHandlerTest {
+public class GetAllCustomersHandlerTest {
 
     public static final String WILDCARD = "*";
-    public static final String BODY = "body";
     public static final String HEADERS = "headers";
 
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerService;
     private Environment environment;
-    private CreateCustomerHandler handler;
+    private GetAllCustomersHandler handler;
     private ByteArrayOutputStream outputStream;
     private Context context;
 
@@ -49,21 +52,22 @@ public class CreateCustomerHandlerTest {
         customerService = mock(CustomerService.class);
         environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
-        handler = new CreateCustomerHandler(customerService, environment);
+        handler = new GetAllCustomersHandler(customerService, environment);
         outputStream = new ByteArrayOutputStream();
         context = new TestContext();
     }
 
     @Test
-    @DisplayName("Request to Handler Returns Customer Created")
-    public void requestToHandlerReturnsCustomerCreated() throws Exception {
+    public void requestToHandlerReturnsCustomer() throws Exception {
+        UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()
-                .withName("New Customer")
+                .withIdentifier(identifier)
                 .build();
-        when(customerService.createCustomer(customer)).thenReturn(customer);
+        List<Customer> customers = List.of(customer);
+        when(customerService.getCustomers()).thenReturn(customers);
 
         Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = inputStream(customer, headers);
+        InputStream inputStream = inputStream(headers);
 
         handler.handleRequest(inputStream, outputStream, context);
 
@@ -72,9 +76,9 @@ public class CreateCustomerHandlerTest {
                 GatewayResponse.class);
 
         GatewayResponse<Customer> expected = new GatewayResponse<>(
-            customer,
+            objectMapper.writeValueAsString(customers),
             getResponseHeaders(),
-            HttpStatus.SC_CREATED
+            HttpStatus.SC_OK
         );
 
         assertEquals(expected, actual);
@@ -82,20 +86,26 @@ public class CreateCustomerHandlerTest {
 
     private Map<String, Object> getRequestHeaders() {
         return Map.of(
-                CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType(),
-                ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+                CONTENT_TYPE, APPLICATION_JSON.getMimeType(),
+                ACCEPT, APPLICATION_JSON.getMimeType());
     }
 
     private Map<String, String> getResponseHeaders() {
         return Map.of(
-                CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType(),
+                CONTENT_TYPE, APPLICATION_JSON.getMimeType(),
                 ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD
         );
     }
 
-    protected InputStream inputStream(Object body, Map<String,Object> headers) throws JsonProcessingException {
+    private Map<String, String> getErrorResponseHeaders() {
+        return Map.of(
+                CONTENT_TYPE, APPLICATION_PROBLEM_JSON,
+                ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD
+        );
+    }
+
+    protected InputStream inputStream(Map<String,Object> headers) throws JsonProcessingException {
         Map<String,Object> request = Map.of(
-                BODY, objectMapper.writeValueAsString(body),
                 HEADERS, headers
         );
         return new ByteArrayInputStream(objectMapper.writeValueAsBytes(request));
