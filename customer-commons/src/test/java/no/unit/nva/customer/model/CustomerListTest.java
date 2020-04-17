@@ -11,5 +11,4 @@ public class CustomerListTest {
         CustomerList customers = CustomerList.of(new Customer());
         assertEquals(1, customers.size());
     }
-
 }

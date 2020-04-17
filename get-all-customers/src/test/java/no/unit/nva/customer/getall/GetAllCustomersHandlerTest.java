@@ -20,12 +20,9 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
-import static nva.commons.handlers.ApiGatewayHandler.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
+import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
-import static nva.commons.handlers.ApiGatewayHandler.APPLICATION_PROBLEM_JSON;
-import static nva.commons.handlers.ApiGatewayHandler.CONTENT_TYPE;
-import static org.apache.http.HttpHeaders.ACCEPT;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,8 +33,8 @@ public class GetAllCustomersHandlerTest {
     public static final String HEADERS = "headers";
 
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
-    private CustomerService customerService;
-    private Environment environment;
+    private CustomerService customerServiceMock;
+    private Environment environmentMock;
     private GetAllCustomersHandler handler;
     private ByteArrayOutputStream outputStream;
     private Context context;
@@ -47,10 +44,10 @@ public class GetAllCustomersHandlerTest {
      */
     @BeforeEach
     public void setUp() {
-        customerService = mock(CustomerService.class);
-        environment = mock(Environment.class);
-        when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
-        handler = new GetAllCustomersHandler(customerService, environment);
+        customerServiceMock = mock(CustomerService.class);
+        environmentMock = mock(Environment.class);
+        when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
+        handler = new GetAllCustomersHandler(customerServiceMock, environmentMock);
         outputStream = new ByteArrayOutputStream();
         context = new TestContext();
     }
@@ -62,10 +59,10 @@ public class GetAllCustomersHandlerTest {
                 .withIdentifier(identifier)
                 .build();
         CustomerList customers = CustomerList.of(customer);
-        when(customerService.getCustomers()).thenReturn(customers);
+        when(customerServiceMock.getCustomers()).thenReturn(customers);
 
         Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = inputStream(headers);
+        InputStream inputStream = createRequest(headers);
 
         handler.handleRequest(inputStream, outputStream, context);
 
@@ -82,27 +79,7 @@ public class GetAllCustomersHandlerTest {
         assertEquals(expected, actual);
     }
 
-    private Map<String, Object> getRequestHeaders() {
-        return Map.of(
-                CONTENT_TYPE, APPLICATION_JSON.getMimeType(),
-                ACCEPT, APPLICATION_JSON.getMimeType());
-    }
-
-    private Map<String, String> getResponseHeaders() {
-        return Map.of(
-                CONTENT_TYPE, APPLICATION_JSON.getMimeType(),
-                ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD
-        );
-    }
-
-    private Map<String, String> getErrorResponseHeaders() {
-        return Map.of(
-                CONTENT_TYPE, APPLICATION_PROBLEM_JSON,
-                ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD
-        );
-    }
-
-    protected InputStream inputStream(Map<String,Object> headers) throws JsonProcessingException {
+    protected InputStream createRequest(Map<String,Object> headers) throws JsonProcessingException {
         Map<String,Object> request = Map.of(
                 HEADERS, headers
         );
