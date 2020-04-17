@@ -56,7 +56,7 @@ public class GetAllCustomersHandlerTest {
     }
 
     @Test
-    public void requestToHandlerReturnsCustomer() throws Exception {
+    public void requestToHandlerReturnsCustomerList() throws Exception {
         UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()
                 .withIdentifier(identifier)
