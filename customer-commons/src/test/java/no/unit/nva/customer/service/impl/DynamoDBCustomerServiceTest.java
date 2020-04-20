@@ -117,8 +117,9 @@ public class DynamoDBCustomerServiceTest {
 
         InputException exception = assertThrows(InputException.class,
             () -> service.updateCustomer(differentIdentifier, createdCustomer));
-        assertEquals(String.format(DynamoDBCustomerService.IDENTIFIERS_NOT_EQUAL,
-                differentIdentifier, customer.getIdentifier()), exception.getMessage());
+        String expectedMessage = String.format(DynamoDBCustomerService.IDENTIFIERS_NOT_EQUAL,
+                differentIdentifier, customer.getIdentifier());
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
