@@ -14,7 +14,7 @@ import nva.commons.utils.JacocoGenerated;
 
 import static org.apache.http.HttpStatus.SC_OK;
 
-public class GetAllCustomersHandler extends ApiGatewayHandler<String, CustomerList> {
+public class GetAllCustomersHandler extends ApiGatewayHandler<Void, CustomerList> {
 
     private final CustomerService customerService;
 
@@ -37,18 +37,18 @@ public class GetAllCustomersHandler extends ApiGatewayHandler<String, CustomerLi
      * @param environment   environment
      */
     public GetAllCustomersHandler(CustomerService customerService, Environment environment) {
-        super(String.class, environment);
+        super(Void.class, environment);
         this.customerService = customerService;
     }
 
     @Override
-    protected CustomerList processInput(String input, RequestInfo requestInfo, Context context)
+    protected CustomerList processInput(Void input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
         return CustomerList.of(customerService.getCustomers());
     }
 
     @Override
-    protected Integer getSuccessStatusCode(String input, CustomerList output) {
+    protected Integer getSuccessStatusCode(Void input, CustomerList output) {
         return SC_OK;
     }
 }

@@ -17,7 +17,7 @@ import java.util.UUID;
 
 import static org.apache.http.HttpStatus.SC_OK;
 
-public class GetCustomerHandler extends ApiGatewayHandler<String,Customer> {
+public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
 
     public static final String IDENTIFIER = "identifier";
     public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
@@ -43,12 +43,12 @@ public class GetCustomerHandler extends ApiGatewayHandler<String,Customer> {
      * @param environment   environment
      */
     public GetCustomerHandler(CustomerService customerService, Environment environment) {
-        super(String.class, environment);
+        super(Void.class, environment);
         this.customerService = customerService;
     }
 
     @Override
-    protected Customer processInput(String input, RequestInfo requestInfo, Context context)
+    protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
         return customerService.getCustomer(getIdentifier(requestInfo));
     }
@@ -64,7 +64,7 @@ public class GetCustomerHandler extends ApiGatewayHandler<String,Customer> {
     }
 
     @Override
-    protected Integer getSuccessStatusCode(String input, Customer output) {
+    protected Integer getSuccessStatusCode(Void input, Customer output) {
         return SC_OK;
     }
 }
