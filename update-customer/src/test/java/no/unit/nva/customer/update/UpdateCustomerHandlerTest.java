@@ -117,7 +117,8 @@ public class UpdateCustomerHandlerTest {
         assertEquals(expected, actual);
     }
 
-    protected InputStream createRequest(String identifier, Object body, Map<String,Object> headers) throws JsonProcessingException {
+    protected InputStream createRequest(String identifier, Object body, Map<String,Object> headers)
+            throws JsonProcessingException {
         Map<String,Object> request = Map.of(
                 PATH_PARAMETERS, Map.of(IDENTIFIER, identifier),
                 BODY, objectMapper.writeValueAsString(body),

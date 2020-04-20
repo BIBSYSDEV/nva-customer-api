@@ -30,8 +30,8 @@ public class DynamoDBCustomerService implements CustomerService {
     public static final String ERROR_WRITING_ITEM_TO_TABLE = "Error writing Item to Table";
     public static final String CUSTOMER_NOT_FOUND = "Customer not found: ";
     public static final String ERROR_READING_FROM_TABLE = "Error reading from Table";
-    public static final String IDENTIFIERS_NOT_EQUAL = "Identifier in request parameters '%s' " +
-            "is not equal to identifier in customer object '%s'";
+    public static final String IDENTIFIERS_NOT_EQUAL = "Identifier in request parameters '%s' "
+            + "is not equal to identifier in customer object '%s'";
 
     private final Table table;
     private final ObjectMapper objectMapper;

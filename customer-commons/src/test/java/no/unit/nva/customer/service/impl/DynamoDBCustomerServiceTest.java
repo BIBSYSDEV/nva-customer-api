@@ -116,7 +116,7 @@ public class DynamoDBCustomerServiceTest {
         UUID differentIdentifier = UUID.randomUUID();
 
         InputException exception = assertThrows(InputException.class,
-                () -> service.updateCustomer(differentIdentifier, createdCustomer));
+            () -> service.updateCustomer(differentIdentifier, createdCustomer));
         assertEquals(String.format(DynamoDBCustomerService.IDENTIFIERS_NOT_EQUAL,
                 differentIdentifier, customer.getIdentifier()), exception.getMessage());
     }
