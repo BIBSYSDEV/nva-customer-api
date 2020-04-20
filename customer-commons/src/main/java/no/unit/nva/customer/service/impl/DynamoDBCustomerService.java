@@ -30,6 +30,8 @@ public class DynamoDBCustomerService implements CustomerService {
     public static final String ERROR_WRITING_ITEM_TO_TABLE = "Error writing Item to Table";
     public static final String CUSTOMER_NOT_FOUND = "Customer not found: ";
     public static final String ERROR_READING_FROM_TABLE = "Error reading from Table";
+    public static final String IDENTIFIERS_NOT_EQUAL = "Identifier in request parameters '%s' " +
+            "is not equal to identifier in customer object '%s'";
 
     private final Table table;
     private final ObjectMapper objectMapper;
@@ -102,6 +104,7 @@ public class DynamoDBCustomerService implements CustomerService {
 
     @Override
     public Customer updateCustomer(UUID identifier, Customer customer) throws ApiGatewayException {
+        validateIdentifier(identifier, customer);
         try {
             customer.setModifiedDate(Instant.now());
             Item item = customerToItem(customer);
@@ -110,6 +113,12 @@ public class DynamoDBCustomerService implements CustomerService {
             throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE, e);
         }
         return getCustomer(identifier);
+    }
+
+    private void validateIdentifier(UUID identifier, Customer customer) throws InputException {
+        if (!identifier.equals(customer.getIdentifier())) {
+            throw new InputException(String.format(IDENTIFIERS_NOT_EQUAL, identifier, customer.getIdentifier()), null);
+        }
     }
 
     protected Item customerToItem(Customer customer) throws InputException {

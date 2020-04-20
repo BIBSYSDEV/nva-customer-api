@@ -1,4 +1,4 @@
-package no.unit.nva.customer.create;
+package no.unit.nva.customer.update;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,29 +13,37 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.zalando.problem.Problem;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.UUID;
 
+import static no.unit.nva.customer.testing.TestHeaders.getErrorResponseHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
+import static no.unit.nva.customer.update.UpdateCustomerHandler.IDENTIFIER;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.zalando.problem.Status.BAD_REQUEST;
 
-public class CreateCustomerHandlerTest {
+public class UpdateCustomerHandlerTest {
 
     public static final String WILDCARD = "*";
     public static final String BODY = "body";
     public static final String HEADERS = "headers";
+    public static final String PATH_PARAMETERS = "pathParameters";
+    public static final String REQUEST_ID = "requestId";
 
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerServiceMock;
     private Environment environmentMock;
-    private CreateCustomerHandler handler;
+    private UpdateCustomerHandler handler;
     private ByteArrayOutputStream outputStream;
     private Context context;
 
@@ -47,20 +55,22 @@ public class CreateCustomerHandlerTest {
         customerServiceMock = mock(CustomerService.class);
         environmentMock = mock(Environment.class);
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
-        handler = new CreateCustomerHandler(customerServiceMock, environmentMock);
+        handler = new UpdateCustomerHandler(customerServiceMock, environmentMock);
         outputStream = new ByteArrayOutputStream();
         context = new TestContext();
     }
 
     @Test
-    public void requestToHandlerReturnsCustomerCreated() throws Exception {
+    public void requestToHandlerReturnsCustomerUpdated() throws Exception {
+        UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()
+                .withIdentifier(identifier)
                 .withName("New Customer")
                 .build();
-        when(customerServiceMock.createCustomer(customer)).thenReturn(customer);
+        when(customerServiceMock.updateCustomer(identifier, customer)).thenReturn(customer);
 
         Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = createRequest(customer, headers);
+        InputStream inputStream = createRequest(identifier.toString(), customer, headers);
 
         handler.handleRequest(inputStream, outputStream, context);
 
@@ -71,14 +81,45 @@ public class CreateCustomerHandlerTest {
         GatewayResponse<Customer> expected = new GatewayResponse<>(
             customer,
             getResponseHeaders(),
-            HttpStatus.SC_CREATED
+            HttpStatus.SC_OK
         );
 
         assertEquals(expected, actual);
     }
 
-    protected InputStream createRequest(Object body, Map<String,Object> headers) throws JsonProcessingException {
+    @Test
+    public void requestToHandlerWithMalformedIdentifierReturnsBadRequest() throws Exception {
+        String malformedIdentifier = "for-testing";
+        Customer customer = new Customer.Builder()
+                .withIdentifier(UUID.randomUUID())
+                .withName("New Customer")
+                .build();
+        Map<String,Object> headers = getRequestHeaders();
+        InputStream inputStream = createRequest(malformedIdentifier, customer, headers);
+
+        handler.handleRequest(inputStream, outputStream, context);
+
+        GatewayResponse<Problem> actual = objectMapper.readValue(
+                outputStream.toByteArray(),
+                GatewayResponse.class);
+
+        GatewayResponse<Problem> expected = new GatewayResponse<>(
+                Problem.builder()
+                        .withStatus(BAD_REQUEST)
+                        .withTitle(BAD_REQUEST.getReasonPhrase())
+                        .withDetail(UpdateCustomerHandler.IDENTIFIER_IS_NOT_A_VALID_UUID + malformedIdentifier)
+                        .with(REQUEST_ID, null)
+                        .build(),
+                getErrorResponseHeaders(),
+                SC_BAD_REQUEST
+        );
+
+        assertEquals(expected, actual);
+    }
+
+    protected InputStream createRequest(String identifier, Object body, Map<String,Object> headers) throws JsonProcessingException {
         Map<String,Object> request = Map.of(
+                PATH_PARAMETERS, Map.of(IDENTIFIER, identifier),
                 BODY, objectMapper.writeValueAsString(body),
                 HEADERS, headers
         );

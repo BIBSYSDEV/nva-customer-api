@@ -1,4 +1,4 @@
-package no.unit.nva.customer.get;
+package no.unit.nva.customer.update;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -12,12 +12,11 @@ import nva.commons.handlers.ApiGatewayHandler;
 import nva.commons.handlers.RequestInfo;
 import nva.commons.utils.Environment;
 import nva.commons.utils.JacocoGenerated;
+import org.apache.http.HttpStatus;
 
 import java.util.UUID;
 
-import static org.apache.http.HttpStatus.SC_OK;
-
-public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
+public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> {
 
     public static final String IDENTIFIER = "identifier";
     public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
@@ -25,10 +24,10 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
     private final CustomerService customerService;
 
     /**
-     * Default Constructor for GetCustomerHandler.
+     * Default Constructor for UpdateCustomerHandler.
      */
     @JacocoGenerated
-    public GetCustomerHandler() {
+    public UpdateCustomerHandler() {
         this(new DynamoDBCustomerService(
                 AmazonDynamoDBClientBuilder.defaultClient(),
                 ObjectMapperConfig.objectMapper,
@@ -37,20 +36,20 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
     }
 
     /**
-     * Constructor for CreateCustomerHandler.
+     * Constructor for UpdateCustomerHandler.
      *
      * @param customerService customerService
      * @param environment   environment
      */
-    public GetCustomerHandler(CustomerService customerService, Environment environment) {
-        super(Void.class, environment);
+    public UpdateCustomerHandler(CustomerService customerService, Environment environment) {
+        super(Customer.class, environment);
         this.customerService = customerService;
     }
 
     @Override
-    protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
+    protected Customer processInput(Customer input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        return customerService.getCustomer(getIdentifier(requestInfo));
+        return customerService.updateCustomer(getIdentifier(requestInfo), input);
     }
 
     protected UUID getIdentifier(RequestInfo requestInfo) throws ApiGatewayException {
@@ -64,7 +63,7 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Void input, Customer output) {
-        return SC_OK;
+    protected Integer getSuccessStatusCode(Customer input, Customer output) {
+        return HttpStatus.SC_OK;
     }
 }

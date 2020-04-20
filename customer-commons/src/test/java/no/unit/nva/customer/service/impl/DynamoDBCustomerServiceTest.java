@@ -15,6 +15,7 @@ import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import nva.commons.utils.Environment;
 import org.junit.Rule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
@@ -106,6 +107,18 @@ public class DynamoDBCustomerServiceTest {
 
         Customer updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
         assertEquals(customer.getCreatedDate(), updatedCustomer.getCreatedDate());
+    }
+
+    @Test
+    public void updateExistingCustomerWithDifferentIdentifiersThrowsException() throws Exception {
+        Customer customer = getNewCustomer();
+        Customer createdCustomer = service.createCustomer(customer);
+        UUID differentIdentifier = UUID.randomUUID();
+
+        InputException exception = assertThrows(InputException.class,
+                () -> service.updateCustomer(differentIdentifier, createdCustomer));
+        assertEquals(String.format(DynamoDBCustomerService.IDENTIFIERS_NOT_EQUAL,
+                differentIdentifier, customer.getIdentifier()), exception.getMessage());
     }
 
     @Test
