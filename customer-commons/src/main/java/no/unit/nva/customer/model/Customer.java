@@ -10,7 +10,6 @@ import java.util.UUID;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 public class Customer {
 
-    public static final String DYNAMODB_KEY_DELIMITER = "#";
     public static final String IDENTIFIER = "identifier";
 
     private UUID identifier;
