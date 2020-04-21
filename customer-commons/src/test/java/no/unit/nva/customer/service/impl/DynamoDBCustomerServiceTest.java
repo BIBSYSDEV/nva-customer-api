@@ -15,7 +15,6 @@ import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import nva.commons.utils.Environment;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;

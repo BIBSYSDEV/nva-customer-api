@@ -1,7 +1,6 @@
 package no.unit.nva.customer.update;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
@@ -11,11 +10,9 @@ import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.zalando.problem.Problem;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
@@ -25,6 +22,7 @@ import static no.unit.nva.customer.testing.TestHeaders.getErrorResponseHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
 import static no.unit.nva.customer.update.UpdateCustomerHandler.IDENTIFIER;
+import static no.unit.nva.testutils.HandlerUtils.requestObjectToApiGatewayRequestInputSteam;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,8 +67,13 @@ public class UpdateCustomerHandlerTest {
                 .build();
         when(customerServiceMock.updateCustomer(identifier, customer)).thenReturn(customer);
 
-        Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = createRequest(identifier.toString(), customer, headers);
+        Map<String,String> headers = getRequestHeaders();
+        Map<String,String> pathParameters = Map.of(IDENTIFIER, identifier.toString());
+        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
+                customer,
+                headers,
+                pathParameters,
+                null);
 
         handler.handleRequest(inputStream, outputStream, context);
 
@@ -94,8 +97,13 @@ public class UpdateCustomerHandlerTest {
                 .withIdentifier(UUID.randomUUID())
                 .withName("New Customer")
                 .build();
-        Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = createRequest(malformedIdentifier, customer, headers);
+        Map<String,String> headers = getRequestHeaders();
+        Map<String,String> pathParameters = Map.of(IDENTIFIER, malformedIdentifier);
+        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
+                customer,
+                headers,
+                pathParameters,
+                null);
 
         handler.handleRequest(inputStream, outputStream, context);
 
@@ -116,15 +124,4 @@ public class UpdateCustomerHandlerTest {
 
         assertEquals(expected, actual);
     }
-
-    protected InputStream createRequest(String identifier, Object body, Map<String,Object> headers)
-            throws JsonProcessingException {
-        Map<String,Object> request = Map.of(
-                PATH_PARAMETERS, Map.of(IDENTIFIER, identifier),
-                BODY, objectMapper.writeValueAsString(body),
-                HEADERS, headers
-        );
-        return new ByteArrayInputStream(objectMapper.writeValueAsBytes(request));
-    }
-
 }

@@ -1,7 +1,6 @@
 package no.unit.nva.customer.getall;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
@@ -14,7 +13,6 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
@@ -22,6 +20,7 @@ import java.util.UUID;
 
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
+import static no.unit.nva.testutils.HandlerUtils.requestObjectToApiGatewayRequestInputSteam;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -61,8 +60,10 @@ public class GetAllCustomersHandlerTest {
         CustomerList customers = CustomerList.of(customer);
         when(customerServiceMock.getCustomers()).thenReturn(customers);
 
-        Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = createRequest(headers);
+        Map<String,String> headers = getRequestHeaders();
+        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
+                null,
+                headers);
 
         handler.handleRequest(inputStream, outputStream, context);
 
@@ -78,12 +79,4 @@ public class GetAllCustomersHandlerTest {
 
         assertEquals(expected, actual);
     }
-
-    protected InputStream createRequest(Map<String,Object> headers) throws JsonProcessingException {
-        Map<String,Object> request = Map.of(
-                HEADERS, headers
-        );
-        return new ByteArrayInputStream(objectMapper.writeValueAsBytes(request));
-    }
-
 }

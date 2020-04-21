@@ -1,7 +1,6 @@
 package no.unit.nva.customer.get;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.zalando.problem.Problem;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
@@ -25,6 +23,7 @@ import static no.unit.nva.customer.get.GetCustomerHandler.IDENTIFIER_IS_NOT_A_VA
 import static no.unit.nva.customer.testing.TestHeaders.getErrorResponseHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
+import static no.unit.nva.testutils.HandlerUtils.requestObjectToApiGatewayRequestInputSteam;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,9 +66,13 @@ public class GetCustomerHandlerTest {
                 .build();
         when(customerServiceMock.getCustomer(identifier)).thenReturn(customer);
 
-        Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = createRequest(identifier.toString(), headers);
-
+        Map<String,String> headers = getRequestHeaders();
+        Map<String, String> pathParameters = Map.of(IDENTIFIER, identifier.toString());
+        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
+                customer,
+                headers,
+                pathParameters,
+                null);
         handler.handleRequest(inputStream, outputStream, context);
 
         GatewayResponse<Customer> actual = objectMapper.readValue(
@@ -89,8 +92,13 @@ public class GetCustomerHandlerTest {
     public void requestToHandlerWithMalformedIdentifierReturnsBadRequest() throws Exception {
         String malformedIdentifier = "for-testing";
 
-        Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = createRequest(malformedIdentifier, headers);
+        Map<String,String> headers = getRequestHeaders();
+        Map<String, String> pathParameters = Map.of(IDENTIFIER, malformedIdentifier);
+        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
+                null,
+                headers,
+                pathParameters,
+                null);
 
         handler.handleRequest(inputStream, outputStream, context);
 
@@ -111,13 +119,4 @@ public class GetCustomerHandlerTest {
 
         assertEquals(expected, actual);
     }
-
-    protected InputStream createRequest(String identifier, Map<String,Object> headers) throws JsonProcessingException {
-        Map<String,Object> request = Map.of(
-                PATH_PARAMETERS, Map.of(IDENTIFIER, identifier),
-                HEADERS, headers
-        );
-        return new ByteArrayInputStream(objectMapper.writeValueAsBytes(request));
-    }
-
 }

@@ -19,7 +19,7 @@ public class TestHeaders {
      * Request headers for testing.
      * @return headers
      */
-    public static Map<String, Object> getRequestHeaders() {
+    public static Map<String,String> getRequestHeaders() {
         return Map.of(
                 CONTENT_TYPE, APPLICATION_JSON.getMimeType(),
                 ACCEPT, APPLICATION_JSON.getMimeType());
@@ -29,7 +29,7 @@ public class TestHeaders {
      * Successful response headers for testing.
      * @return headers
      */
-    public static  Map<String, String> getResponseHeaders() {
+    public static  Map<String,String> getResponseHeaders() {
         return Map.of(
                 CONTENT_TYPE, APPLICATION_JSON.getMimeType(),
                 ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD
@@ -40,7 +40,7 @@ public class TestHeaders {
      * Failing response headers for testing.
      * @return headers
      */
-    public static  Map<String, String> getErrorResponseHeaders() {
+    public static  Map<String,String> getErrorResponseHeaders() {
         return Map.of(
                 CONTENT_TYPE, APPLICATION_PROBLEM_JSON,
                 ACCESS_CONTROL_ALLOW_ORIGIN, WILDCARD
