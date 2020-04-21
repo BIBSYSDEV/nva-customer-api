@@ -109,6 +109,19 @@ public class DynamoDBCustomerServiceTest {
     }
 
     @Test
+    public void updateExistingCustomerWithDifferentIdentifiersThrowsException() throws Exception {
+        Customer customer = getNewCustomer();
+        Customer createdCustomer = service.createCustomer(customer);
+        UUID differentIdentifier = UUID.randomUUID();
+
+        InputException exception = assertThrows(InputException.class,
+            () -> service.updateCustomer(differentIdentifier, createdCustomer));
+        String expectedMessage = String.format(DynamoDBCustomerService.IDENTIFIERS_NOT_EQUAL,
+                differentIdentifier, customer.getIdentifier());
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
     public void getExistingCustomerReturnsTheCustomer() throws Exception {
         Customer customer = getNewCustomer();
         Customer createdCustomer = service.createCustomer(customer);

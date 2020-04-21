@@ -1,7 +1,6 @@
 package no.unit.nva.customer.create;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
@@ -11,16 +10,15 @@ import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
 
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
+import static no.unit.nva.testutils.HandlerUtils.requestObjectToApiGatewayRequestInputSteam;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -53,16 +51,16 @@ public class CreateCustomerHandlerTest {
     }
 
     @Test
-    @DisplayName("Request to Handler Returns Customer Created")
     public void requestToHandlerReturnsCustomerCreated() throws Exception {
         Customer customer = new Customer.Builder()
                 .withName("New Customer")
                 .build();
         when(customerServiceMock.createCustomer(customer)).thenReturn(customer);
 
-        Map<String,Object> headers = getRequestHeaders();
-        InputStream inputStream = createRequest(customer, headers);
-
+        Map<String, String> headers = getRequestHeaders();
+        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
+                customer,
+                headers);
         handler.handleRequest(inputStream, outputStream, context);
 
         GatewayResponse<Customer> actual = objectMapper.readValue(
@@ -70,20 +68,11 @@ public class CreateCustomerHandlerTest {
                 GatewayResponse.class);
 
         GatewayResponse<Customer> expected = new GatewayResponse<>(
-            customer,
-            getResponseHeaders(),
-            HttpStatus.SC_CREATED
+                customer,
+                getResponseHeaders(),
+                HttpStatus.SC_CREATED
         );
 
         assertEquals(expected, actual);
     }
-
-    protected InputStream createRequest(Object body, Map<String,Object> headers) throws JsonProcessingException {
-        Map<String,Object> request = Map.of(
-                BODY, objectMapper.writeValueAsString(body),
-                HEADERS, headers
-        );
-        return new ByteArrayInputStream(objectMapper.writeValueAsBytes(request));
-    }
-
 }

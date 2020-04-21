@@ -78,10 +78,6 @@ Resources:
                   description: Bad Request
                   schema:
                     $ref: '#/definitions/Problem'
-                '404':
-                  description: Not Found
-                  schema:
-                    $ref: '#/definitions/Problem'
                 '502':
                   description: Bad Gateway
                   schema:
@@ -152,6 +148,45 @@ Resources:
                     $ref: '#/definitions/Problem'
                 '404':
                   description: Not Found
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '502':
+                  description: Bad Gateway
+                  schema:
+                    $ref: '#/definitions/Problem'
+            put:
+              summary: Update Customer
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              security:
+                - CognitoUserPool: []
+              parameters:
+                - in: path
+                  name: identifier
+                  type: string
+                  format: uuid
+                  required: true
+                  description: UUID identifier of the Customer to update.
+                - in: body
+                  name: customer
+                  description: The Customer to update.
+                  schema:
+                    $ref: '#/definitions/Customer'
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaUpdateCustomerFunction.Arn}/invocations
+                responses: {}
+                httpMethod: POST
+                type: AWS_PROXY
+              responses:
+                '200':
+                  description: OK
+                  schema:
+                    $ref: '#/definitions/Customer'
+                '400':
+                  description: Bad Request
                   schema:
                     $ref: '#/definitions/Problem'
                 '502':
@@ -262,6 +297,24 @@ Resources:
           Properties:
             Path: /
             Method: get
+            RestApiId: !Ref NvaCustomerApi
+  NvaUpdateCustomerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: update-customer
+      Handler: no.unit.nva.customer.update.UpdateCustomerHandler::handleRequest
+      Runtime: java11
+      MemorySize: 1400
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: '*'
+          TABLE_NAME: !Ref CustomersTableName
+      Events:
+        PutEvent:
+          Type: Api
+          Properties:
+            Path: /{identifier}
+            Method: put
             RestApiId: !Ref NvaCustomerApi
   NvaCustomerBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
