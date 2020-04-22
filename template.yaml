@@ -255,6 +255,9 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTableName
       Events:
         PostEvent:
           Type: Api
@@ -273,6 +276,9 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTableName
       Events:
         GetEvent:
           Type: Api
@@ -291,6 +297,9 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTableName
       Events:
         GetEvent:
           Type: Api
@@ -309,6 +318,9 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTableName
       Events:
         PutEvent:
           Type: Api
