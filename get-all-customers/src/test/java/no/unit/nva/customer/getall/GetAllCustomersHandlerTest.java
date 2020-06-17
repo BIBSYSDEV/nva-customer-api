@@ -6,6 +6,7 @@ import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.model.CustomerList;
 import no.unit.nva.customer.service.CustomerService;
+import no.unit.nva.testutils.HandlerRequestBuilder;
 import no.unit.nva.testutils.TestContext;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
@@ -15,12 +16,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.UUID;
 
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
-import static no.unit.nva.testutils.HandlerUtils.requestObjectToApiGatewayRequestInputSteam;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -29,7 +28,6 @@ import static org.mockito.Mockito.when;
 public class GetAllCustomersHandlerTest {
 
     public static final String WILDCARD = "*";
-    public static final String HEADERS = "headers";
 
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerServiceMock;
@@ -60,10 +58,9 @@ public class GetAllCustomersHandlerTest {
         CustomerList customers = CustomerList.of(customer);
         when(customerServiceMock.getCustomers()).thenReturn(customers);
 
-        Map<String,String> headers = getRequestHeaders();
-        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
-                null,
-                headers);
+        InputStream inputStream = new HandlerRequestBuilder<Void>(objectMapper)
+                .withHeaders(getRequestHeaders())
+                .build();
 
         handler.handleRequest(inputStream, outputStream, context);
 

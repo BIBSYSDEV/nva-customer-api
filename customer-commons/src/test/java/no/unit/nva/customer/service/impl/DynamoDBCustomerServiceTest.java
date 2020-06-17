@@ -44,7 +44,7 @@ public class DynamoDBCustomerServiceTest {
     @Rule
     public CustomerDynamoDBLocal db =  new CustomerDynamoDBLocal();
 
-    private ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper;
+    private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private DynamoDBCustomerService service;
     private Environment environment;
     private AmazonDynamoDB client;

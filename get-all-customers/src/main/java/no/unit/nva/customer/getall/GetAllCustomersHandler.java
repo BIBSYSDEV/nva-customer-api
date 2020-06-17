@@ -11,12 +11,15 @@ import nva.commons.handlers.ApiGatewayHandler;
 import nva.commons.handlers.RequestInfo;
 import nva.commons.utils.Environment;
 import nva.commons.utils.JacocoGenerated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.http.HttpStatus.SC_OK;
 
 public class GetAllCustomersHandler extends ApiGatewayHandler<Void, CustomerList> {
 
     private final CustomerService customerService;
+    private static final Logger logger = LoggerFactory.getLogger(GetAllCustomersHandler.class);
 
     /**
      * Default Constructor for GetAllCustomersHandler.
@@ -37,7 +40,7 @@ public class GetAllCustomersHandler extends ApiGatewayHandler<Void, CustomerList
      * @param environment   environment
      */
     public GetAllCustomersHandler(CustomerService customerService, Environment environment) {
-        super(Void.class, environment);
+        super(Void.class, environment, logger);
         this.customerService = customerService;
     }
 

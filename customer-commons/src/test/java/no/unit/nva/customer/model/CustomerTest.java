@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper;
+    private final ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
 
     @Test
     public void customerMappedToJsonAndBack() throws JsonProcessingException {

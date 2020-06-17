@@ -15,6 +15,8 @@ import nva.commons.utils.JacocoGenerated;
 import org.apache.http.HttpStatus;
 
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> {
 
@@ -22,6 +24,7 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> 
     public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
 
     private final CustomerService customerService;
+    private static final Logger logger = LoggerFactory.getLogger(UpdateCustomerHandler.class);
 
     /**
      * Default Constructor for UpdateCustomerHandler.
@@ -42,7 +45,7 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> 
      * @param environment   environment
      */
     public UpdateCustomerHandler(CustomerService customerService, Environment environment) {
-        super(Customer.class, environment);
+        super(Customer.class, environment, logger);
         this.customerService = customerService;
     }
 

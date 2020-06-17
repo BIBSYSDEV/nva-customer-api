@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
+import no.unit.nva.testutils.HandlerRequestBuilder;
 import no.unit.nva.testutils.TestContext;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
@@ -14,11 +15,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.Map;
 
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
-import static no.unit.nva.testutils.HandlerUtils.requestObjectToApiGatewayRequestInputSteam;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -27,8 +26,6 @@ import static org.mockito.Mockito.when;
 public class CreateCustomerHandlerTest {
 
     public static final String WILDCARD = "*";
-    public static final String BODY = "body";
-    public static final String HEADERS = "headers";
 
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerServiceMock;
@@ -57,10 +54,10 @@ public class CreateCustomerHandlerTest {
                 .build();
         when(customerServiceMock.createCustomer(customer)).thenReturn(customer);
 
-        Map<String, String> headers = getRequestHeaders();
-        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
-                customer,
-                headers);
+        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+            .withBody(customer)
+            .withHeaders(getRequestHeaders())
+            .build();
         handler.handleRequest(inputStream, outputStream, context);
 
         GatewayResponse<Customer> actual = objectMapper.readValue(
