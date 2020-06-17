@@ -6,12 +6,12 @@ import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
-import no.unit.nva.testutils.TestContext;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.zalando.problem.Problem;
 
 import java.io.ByteArrayOutputStream;
@@ -53,7 +53,7 @@ public class GetCustomerHandlerTest {
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
         handler = new GetCustomerHandler(customerServiceMock, environmentMock);
         outputStream = new ByteArrayOutputStream();
-        context = new TestContext();
+        context = Mockito.mock(Context.class);
     }
 
     @Test

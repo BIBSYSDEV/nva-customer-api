@@ -6,7 +6,6 @@ import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
-import no.unit.nva.testutils.TestContext;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import org.mockito.Mockito;
 
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
@@ -44,7 +44,7 @@ public class CreateCustomerHandlerTest {
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
         handler = new CreateCustomerHandler(customerServiceMock, environmentMock);
         outputStream = new ByteArrayOutputStream();
-        context = new TestContext();
+        context = Mockito.mock(Context.class);
     }
 
     @Test
