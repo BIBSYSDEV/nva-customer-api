@@ -59,26 +59,26 @@ public class GetCustomerByOrgNumberHandlerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomer() throws Exception {
+        UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()
-            .withIdentifier(UUID.randomUUID())
+            .withIdentifier(identifier)
             .withFeideOrganizationId(SAMPLE_ORG_NUMBER)
             .build();
         when(customerServiceMock.getCustomerByOrgNumber(SAMPLE_ORG_NUMBER)).thenReturn(customer);
 
         Map<String, String> pathParameters = Map.of(GetCustomerByOrgNumberHandler.ORG_NUMBER, SAMPLE_ORG_NUMBER);
-        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
-            .withBody(customer)
+        InputStream inputStream = new HandlerRequestBuilder<Void>(objectMapper)
             .withHeaders(getRequestHeaders())
             .withPathParameters(pathParameters)
             .build();
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<Customer> actual = objectMapper.readValue(
+        GatewayResponse<CustomerIdentifier> actual = objectMapper.readValue(
             outputStream.toByteArray(),
             GatewayResponse.class);
 
-        GatewayResponse<Customer> expected = new GatewayResponse<>(
-            objectMapper.writeValueAsString(customer),
+        GatewayResponse<CustomerIdentifier> expected = new GatewayResponse<>(
+            objectMapper.writeValueAsString(new CustomerIdentifier(identifier)),
             getResponseHeaders(),
             HttpStatus.SC_OK
         );
@@ -90,7 +90,7 @@ public class GetCustomerByOrgNumberHandlerTest {
     @SuppressWarnings("unchecked")
     public void requestToHandlerWithEmptyOrgNumberReturnsBadRequest() throws Exception {
 
-        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+        InputStream inputStream = new HandlerRequestBuilder<Void>(objectMapper)
             .withHeaders(getRequestHeaders())
             .build();
 

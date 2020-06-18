@@ -4,7 +4,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
-import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -17,7 +16,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Customer> {
+public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, CustomerIdentifier> {
 
     public static final String ORG_NUMBER = "orgNumber";
 
@@ -48,7 +47,7 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
     }
 
     @Override
-    protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
+    protected CustomerIdentifier processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         String orgNumber;
         try {
@@ -56,11 +55,11 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
         } catch (IllegalArgumentException e) {
             throw new InputException(e.getMessage(), e);
         }
-        return customerService.getCustomerByOrgNumber(orgNumber);
+        return new CustomerIdentifier(customerService.getCustomerByOrgNumber(orgNumber).getIdentifier());
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Void input, Customer output) {
+    protected Integer getSuccessStatusCode(Void input, CustomerIdentifier output) {
         return HttpStatus.SC_OK;
     }
 }

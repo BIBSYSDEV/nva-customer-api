@@ -160,19 +160,17 @@ Resources:
                     $ref: '#/definitions/Problem'
           /orgNumber/{orgNumber}:
             get:
-              summary: Get Customer by orgNumber
+              summary: Get CustomerIdentifier by orgNumber
               consumes:
                 - application/json
               produces:
                 - application/json
-              security:
-                - CognitoUserPool: []
               parameters:
                 - in: path
                   name: orgNumber
                   type: string
                   required: true
-                  description: OrgNumber of the Customer to get.
+                  description: OrgNumber of the CustomerIdentifier to get.
               x-amazon-apigateway-integration:
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}/invocations
@@ -183,7 +181,7 @@ Resources:
                 '200':
                   description: OK
                   schema:
-                    $ref: '#/definitions/Customer'
+                    $ref: '#/definitions/CustomerIdentifier'
                 '400':
                   description: Bad Request
                   schema:
@@ -236,6 +234,12 @@ Resources:
                   schema:
                     $ref: '#/definitions/Problem'
         definitions:
+          CustomerIdentifier:
+            type: object
+            properties:
+              identifier:
+                type: string
+                format: uuid
           Customer:
             type: object
             properties:
