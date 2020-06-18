@@ -8,7 +8,9 @@ import java.util.UUID;
 
 public interface CustomerService {
 
-    Customer getCustomer(UUID identifier) throws ApiGatewayException;
+    Customer getCustomerByOrgNumber(UUID identifier) throws ApiGatewayException;
+
+    Customer getCustomerByOrgNumber(String orgNumber) throws ApiGatewayException;
 
     List<Customer> getCustomers() throws ApiGatewayException;
 

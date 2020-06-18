@@ -53,7 +53,7 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
     @Override
     protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        return customerService.getCustomer(getIdentifier(requestInfo));
+        return customerService.getCustomerByOrgNumber(getIdentifier(requestInfo));
     }
 
     protected UUID getIdentifier(RequestInfo requestInfo) throws ApiGatewayException {

@@ -46,6 +46,7 @@ public class UpdateCustomerHandlerTest {
      * Setting up test environment.
      */
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
         environmentMock = mock(Environment.class);
@@ -56,6 +57,7 @@ public class UpdateCustomerHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomerUpdated() throws Exception {
         UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()
@@ -87,6 +89,7 @@ public class UpdateCustomerHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void requestToHandlerWithMalformedIdentifierReturnsBadRequest() throws Exception {
         String malformedIdentifier = "for-testing";
         Customer customer = new Customer.Builder()

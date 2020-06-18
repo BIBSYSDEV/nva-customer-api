@@ -38,6 +38,7 @@ public class CreateCustomerHandlerTest {
      * Setting up test environment.
      */
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
         environmentMock = mock(Environment.class);
@@ -48,6 +49,7 @@ public class CreateCustomerHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomerCreated() throws Exception {
         Customer customer = new Customer.Builder()
                 .withName("New Customer")
