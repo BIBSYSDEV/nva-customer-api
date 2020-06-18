@@ -58,7 +58,7 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
         }
         return customerService.getCustomerByOrgNumber(orgNumber);
     }
-    
+
     @Override
     protected Integer getSuccessStatusCode(Void input, Customer output) {
         return HttpStatus.SC_OK;

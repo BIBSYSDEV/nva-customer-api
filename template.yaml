@@ -36,6 +36,9 @@ Parameters:
   CustomersTableName:
     Type: String
     Description: Reference to table containing Customers
+  CustomersByOrgNumberIndexName:
+    Type: String
+    Description: Reference to index containing Customers by org number
 
 Resources:
   NvaCustomerApi:
@@ -135,6 +138,44 @@ Resources:
               x-amazon-apigateway-integration:
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerFunction.Arn}/invocations
+                responses: {}
+                httpMethod: POST
+                type: AWS_PROXY
+              responses:
+                '200':
+                  description: OK
+                  schema:
+                    $ref: '#/definitions/Customer'
+                '400':
+                  description: Bad Request
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '404':
+                  description: Not Found
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '502':
+                  description: Bad Gateway
+                  schema:
+                    $ref: '#/definitions/Problem'
+          /orgNumber/{orgNumber}:
+            get:
+              summary: Get Customer by orgNumber
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              security:
+                - CognitoUserPool: []
+              parameters:
+                - in: path
+                  name: orgNumber
+                  type: string
+                  required: true
+                  description: OrgNumber of the Customer to get.
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}/invocations
                 responses: {}
                 httpMethod: POST
                 type: AWS_PROXY
@@ -256,6 +297,7 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
+          BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -277,6 +319,29 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
+          BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTableName
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /{identifier}
+            Method: get
+            RestApiId: !Ref NvaCustomerApi
+  NvaGetCustomerByOrgNumberFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get-customer
+      Handler: no.unit.nva.customer.get.GetCustomerByOrgNumberHandler::handleRequest
+      Runtime: java11
+      MemorySize: 1400
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: '*'
+          TABLE_NAME: !Ref CustomersTableName
+          BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -298,6 +363,7 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
+          BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -319,6 +385,7 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
+          BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
