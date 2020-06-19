@@ -11,6 +11,8 @@ import java.util.UUID;
 public class Customer {
 
     public static final String IDENTIFIER = "identifier";
+    public static final String ORG_NUMBER = "feideOrganizationId";
+
 
     private UUID identifier;
     private Instant createdDate;

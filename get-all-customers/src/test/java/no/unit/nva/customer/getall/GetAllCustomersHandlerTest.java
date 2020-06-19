@@ -40,6 +40,7 @@ public class GetAllCustomersHandlerTest {
      * Setting up test environment.
      */
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
         environmentMock = mock(Environment.class);
@@ -50,6 +51,7 @@ public class GetAllCustomersHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomerList() throws Exception {
         UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()

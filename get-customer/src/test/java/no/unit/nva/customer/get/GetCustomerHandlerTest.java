@@ -47,6 +47,7 @@ public class GetCustomerHandlerTest {
      * Setting up test environment.
      */
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
         environmentMock = mock(Environment.class);
@@ -57,12 +58,13 @@ public class GetCustomerHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomer() throws Exception {
         UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()
                 .withIdentifier(identifier)
                 .build();
-        when(customerServiceMock.getCustomer(identifier)).thenReturn(customer);
+        when(customerServiceMock.getCustomerByOrgNumber(identifier)).thenReturn(customer);
 
         Map<String, String> pathParameters = Map.of(IDENTIFIER, identifier.toString());
         InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
@@ -86,6 +88,7 @@ public class GetCustomerHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void requestToHandlerWithMalformedIdentifierReturnsBadRequest() throws Exception {
         String malformedIdentifier = "for-testing";
 
