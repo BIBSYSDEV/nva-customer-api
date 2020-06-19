@@ -49,11 +49,11 @@ public class DynamoDBCustomerService implements CustomerService {
      */
     public DynamoDBCustomerService(AmazonDynamoDB client, ObjectMapper objectMapper, Environment environment) {
         String tableName = environment.readEnv(TABLE_NAME);
-        String byOrgNumderIndexName = environment.readEnv(BY_ORG_NUMBER_INDEX_NAME);
+        String byOrgNumberIndexName = environment.readEnv(BY_ORG_NUMBER_INDEX_NAME);
         DynamoDB dynamoDB = new DynamoDB(client);
 
         this.table = dynamoDB.getTable(tableName);
-        this.byOrgNumberIndex = table.getIndex(byOrgNumderIndexName);
+        this.byOrgNumberIndex = table.getIndex(byOrgNumberIndexName);
         this.objectMapper = objectMapper;
     }
 
@@ -115,9 +115,8 @@ public class DynamoDBCustomerService implements CustomerService {
 
     protected List<Customer> scanToCustomers(ItemCollection<ScanOutcome> scan) throws DynamoDBException {
         List<Customer> customers = new ArrayList<>();
-        Iterator<Item> iterator = scan.iterator();
-        while (iterator.hasNext()) {
-            customers.add(itemToCustomer(iterator.next()));
+        for (Item item: scan) {
+            customers.add(itemToCustomer(item));
         }
         return customers;
     }

@@ -35,9 +35,8 @@ public class GetCustomerByOrgNumberHandlerTest {
     public static final String SAMPLE_ORG_NUMBER = "123";
     public static final String EXPECTED_ERROR_MESSAGE = "Missing from pathParameters: orgNumber";
 
-    private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
+    private final ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerServiceMock;
-    private Environment environmentMock;
     private GetCustomerByOrgNumberHandler handler;
     private ByteArrayOutputStream outputStream;
     private Context context;
@@ -46,10 +45,9 @@ public class GetCustomerByOrgNumberHandlerTest {
      * Setting up test environment.
      */
     @BeforeEach
-    @SuppressWarnings("unchecked")
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
-        environmentMock = mock(Environment.class);
+        Environment environmentMock = mock(Environment.class);
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
         handler = new GetCustomerByOrgNumberHandler(customerServiceMock, environmentMock);
         outputStream = new ByteArrayOutputStream();
@@ -58,7 +56,7 @@ public class GetCustomerByOrgNumberHandlerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void requestToHandlerReturnsCustomer() throws Exception {
+    public void getCustomerByOrgNumberReturnsCustomerWhenInputIsExistingCustomerOrgNumber() throws Exception {
         UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()
             .withIdentifier(identifier)
@@ -88,7 +86,7 @@ public class GetCustomerByOrgNumberHandlerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void requestToHandlerWithEmptyOrgNumberReturnsBadRequest() throws Exception {
+    public void getCustomerByOrgNumberReturnsBadRequestWhenOrgNumberisNull() throws Exception {
 
         InputStream inputStream = new HandlerRequestBuilder<Void>(objectMapper)
             .withHeaders(getRequestHeaders())

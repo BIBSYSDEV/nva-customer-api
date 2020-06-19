@@ -13,6 +13,7 @@ import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.Projection;
 import com.amazonaws.services.dynamodbv2.model.ProjectionType;
+import java.util.Collections;
 import no.unit.nva.customer.model.Customer;
 import org.junit.rules.ExternalResource;
 
@@ -21,6 +22,7 @@ import java.util.List;
 
 import static com.amazonaws.services.dynamodbv2.model.BillingMode.PAY_PER_REQUEST;
 import static com.amazonaws.services.dynamodbv2.model.ScalarAttributeType.S;
+import static java.util.Collections.singletonList;
 
 public class CustomerDynamoDBLocal extends ExternalResource {
 
@@ -48,24 +50,24 @@ public class CustomerDynamoDBLocal extends ExternalResource {
         return client.getTable(NVA_CUSTOMERS_TABLE_NAME).getIndex(BY_ORG_NUMBER_INDEX_NAME);
     }
 
-    private CreateTableResult createCustomerTable(AmazonDynamoDB ddb) {
+    private void createCustomerTable(AmazonDynamoDB ddb) {
         List<AttributeDefinition> attributeDefinitions = Arrays.asList(
                 new AttributeDefinition(IDENTIFIER, S),
                 new AttributeDefinition(ORG_NUMBER, S)
         );
 
-        List<KeySchemaElement> keySchema = Arrays.asList(
+        List<KeySchemaElement> keySchema = singletonList(
                 new KeySchemaElement(IDENTIFIER, KeyType.HASH)
         );
 
-        List<KeySchemaElement> byOrgNumberKeyScheme = Arrays.asList(
+        List<KeySchemaElement> byOrgNumberKeyScheme = singletonList(
             new KeySchemaElement(ORG_NUMBER, KeyType.HASH)
         );
 
         Projection byOrgNumberProjection = new Projection()
             .withProjectionType(ProjectionType.ALL);
 
-        List<GlobalSecondaryIndex> globalSecondaryIndexes = Arrays.asList(
+        List<GlobalSecondaryIndex> globalSecondaryIndexes = singletonList(
             new GlobalSecondaryIndex()
                 .withIndexName(BY_ORG_NUMBER_INDEX_NAME)
                 .withKeySchema(byOrgNumberKeyScheme)
@@ -80,7 +82,7 @@ public class CustomerDynamoDBLocal extends ExternalResource {
                 .withGlobalSecondaryIndexes(globalSecondaryIndexes)
                 .withBillingMode(PAY_PER_REQUEST);
 
-        return ddb.createTable(createTableRequest);
+        ddb.createTable(createTableRequest);
     }
 
     @Override
