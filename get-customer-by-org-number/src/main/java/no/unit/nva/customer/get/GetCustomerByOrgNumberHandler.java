@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
+import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -49,13 +50,17 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
     @Override
     protected CustomerIdentifier processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
-        String orgNumber;
+        String orgNumber = getOrgNumber(requestInfo);
+        Customer customer = customerService.getCustomerByOrgNumber(orgNumber);
+        return new CustomerIdentifier(customer.getIdentifier());
+    }
+
+    private String getOrgNumber(RequestInfo requestInfo) throws InputException {
         try {
-            orgNumber = RequestUtils.getPathParameter(requestInfo, ORG_NUMBER);
+            return RequestUtils.getPathParameter(requestInfo, ORG_NUMBER);
         } catch (IllegalArgumentException e) {
             throw new InputException(e.getMessage(), e);
         }
-        return new CustomerIdentifier(customerService.getCustomerByOrgNumber(orgNumber).getIdentifier());
     }
 
     @Override
