@@ -296,7 +296,7 @@ Resources:
       CodeUri: create-customer
       Handler: no.unit.nva.customer.create.CreateCustomerHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -318,7 +318,7 @@ Resources:
       CodeUri: get-customer
       Handler: no.unit.nva.customer.get.GetCustomerHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -340,7 +340,7 @@ Resources:
       CodeUri: get-customer
       Handler: no.unit.nva.customer.get.GetCustomerByOrgNumberHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -362,7 +362,7 @@ Resources:
       CodeUri: get-all-customers
       Handler: no.unit.nva.customer.getall.GetAllCustomersHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -384,7 +384,7 @@ Resources:
       CodeUri: update-customer
       Handler: no.unit.nva.customer.update.UpdateCustomerHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
