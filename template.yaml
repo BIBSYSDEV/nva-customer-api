@@ -328,7 +328,7 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
       Events:
-        GetEvent:
+        GetCustomerEvent:
           Type: Api
           Properties:
             Path: /{identifier}
@@ -350,10 +350,10 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
       Events:
-        GetEvent:
+        GetByOrgNumberEvent:
           Type: Api
           Properties:
-            Path: /{identifier}
+            Path: /orgNumber/{orgNumber}
             Method: get
             RestApiId: !Ref NvaCustomerApi
   NvaGetAllCustomersFunction:
