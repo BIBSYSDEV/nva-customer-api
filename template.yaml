@@ -41,9 +41,14 @@ Parameters:
     Description: Reference to index containing Customers by org number
 
 Resources:
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
   NvaCustomerApi:
     Type: AWS::Serverless::Api
     Properties:
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        Format: '{ "apiId": "$context.apiId", "requestId": "$context.requestId", "requestTime": "$context.requestTime", "requestTimeEpoch": "$context.requestTimeEpoch", "httpMethod": "$context.httpMethod", "path": "$context.path", "status": "$context.status",  "error.message": "$context.error.message" }'
       StageName: Prod
       EndpointConfiguration: REGIONAL
       DefinitionBody:
@@ -296,7 +301,7 @@ Resources:
       CodeUri: create-customer
       Handler: no.unit.nva.customer.create.CreateCustomerHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -318,7 +323,7 @@ Resources:
       CodeUri: get-customer
       Handler: no.unit.nva.customer.get.GetCustomerHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -328,7 +333,7 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
       Events:
-        GetEvent:
+        GetCustomerEvent:
           Type: Api
           Properties:
             Path: /{identifier}
@@ -340,7 +345,7 @@ Resources:
       CodeUri: get-customer
       Handler: no.unit.nva.customer.get.GetCustomerByOrgNumberHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -350,10 +355,10 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
       Events:
-        GetEvent:
+        GetByOrgNumberEvent:
           Type: Api
           Properties:
-            Path: /{identifier}
+            Path: /orgNumber/{orgNumber}
             Method: get
             RestApiId: !Ref NvaCustomerApi
   NvaGetAllCustomersFunction:
@@ -362,7 +367,7 @@ Resources:
       CodeUri: get-all-customers
       Handler: no.unit.nva.customer.getall.GetAllCustomersHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -384,7 +389,7 @@ Resources:
       CodeUri: update-customer
       Handler: no.unit.nva.customer.update.UpdateCustomerHandler::handleRequest
       Runtime: java11
-      MemorySize: 1400
+      MemorySize: 1408
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
