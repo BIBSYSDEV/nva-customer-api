@@ -16,8 +16,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: identifier
           AttributeType: S
-        - AttributeNam: feideOrganizationId
-          AttributeTypr: S
+        - AttributeName: feideOrganizationId
+          AttributeType: S
       KeySchema:
         - AttributeName: identifier
           KeyType: HASH
@@ -27,7 +27,7 @@ Resources:
             - AttributeName: feideOrganizationId
               KeyType: HASH
           Projection:
-            NonKeyAttributes:
+#            NonKeyAttributes:
             ProjectionType: ALL
 
 Outputs:
