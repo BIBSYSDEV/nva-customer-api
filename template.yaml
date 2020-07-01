@@ -342,7 +342,7 @@ Resources:
   NvaGetCustomerByOrgNumberFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: get-customer
+      CodeUri: get-customer-by-org-number
       Handler: no.unit.nva.customer.get.GetCustomerByOrgNumberHandler::handleRequest
       Runtime: java11
       MemorySize: 1408
