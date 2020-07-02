@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.BY_ORG_NUMBER_INDEX_NAME;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_MAPPING_CUSTOMER_TO_ITEM;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_MAPPING_ITEM_TO_CUSTOMER;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_READING_FROM_TABLE;
@@ -41,10 +42,11 @@ import static org.mockito.Mockito.when;
 public class DynamoDBCustomerServiceTest {
 
     public static final String NVA_CUSTOMERS_TEST = "nva_customers_test";
+
     @Rule
     public CustomerDynamoDBLocal db =  new CustomerDynamoDBLocal();
 
-    private ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper;
+    private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private DynamoDBCustomerService service;
     private Environment environment;
     private AmazonDynamoDB client;
@@ -58,13 +60,15 @@ public class DynamoDBCustomerServiceTest {
         environment = mock(Environment.class);
         service = new DynamoDBCustomerService(
                 objectMapper,
-                db.getTable()
+                db.getTable(),
+                db.getByOrgNumberIndex()
         );
     }
 
     @Test
     public void testConstructorThrowsNoExceptions() {
         when(environment.readEnv(TABLE_NAME)).thenReturn(NVA_CUSTOMERS_TEST);
+        when(environment.readEnv(BY_ORG_NUMBER_INDEX_NAME)).thenReturn(NVA_CUSTOMERS_TEST);
         CustomerService serviceWithTableNameFromEnv = new DynamoDBCustomerService(client, objectMapper, environment);
         assertNotNull(serviceWithTableNameFromEnv);
     }
@@ -125,7 +129,15 @@ public class DynamoDBCustomerServiceTest {
     public void getExistingCustomerReturnsTheCustomer() throws Exception {
         Customer customer = getNewCustomer();
         Customer createdCustomer = service.createCustomer(customer);
-        Customer getCustomer = service.getCustomer(createdCustomer.getIdentifier());
+        Customer getCustomer = service.getCustomerByOrgNumber(createdCustomer.getIdentifier());
+        assertEquals(createdCustomer, getCustomer);
+    }
+
+    @Test
+    public void getCustomerByOrgNumberReturnsTheCustomer() throws Exception {
+        Customer customer = getNewCustomer();
+        Customer createdCustomer = service.createCustomer(customer);
+        Customer getCustomer = service.getCustomerByOrgNumber(createdCustomer.getFeideOrganizationId());
         assertEquals(createdCustomer, getCustomer);
     }
 
@@ -143,7 +155,7 @@ public class DynamoDBCustomerServiceTest {
     @Test
     public void getCustomerNotFoundThrowsException() {
         UUID nonExistingCustomer = UUID.randomUUID();
-        assertThrows(NotFoundException.class, () -> service.getCustomer(nonExistingCustomer));
+        assertThrows(NotFoundException.class, () -> service.getCustomerByOrgNumber(nonExistingCustomer));
     }
 
     @Test
@@ -152,10 +164,11 @@ public class DynamoDBCustomerServiceTest {
         when(failingTable.getItem(anyString(),any())).thenThrow(RuntimeException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
-                failingTable
+                failingTable,
+                db.getByOrgNumberIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
-            () -> failingService.getCustomer(UUID.randomUUID()));
+            () -> failingService.getCustomerByOrgNumber(UUID.randomUUID()));
         assertEquals(ERROR_READING_FROM_TABLE, exception.getMessage());
     }
 
@@ -165,7 +178,8 @@ public class DynamoDBCustomerServiceTest {
         when(failingTable.scan()).thenThrow(RuntimeException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
-                failingTable
+                failingTable,
+                db.getByOrgNumberIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.getCustomers());   
@@ -178,7 +192,8 @@ public class DynamoDBCustomerServiceTest {
         when(failingTable.putItem(any(Item.class))).thenThrow(RuntimeException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
-                failingTable
+                failingTable,
+                db.getByOrgNumberIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.createCustomer(getNewCustomer()));
@@ -192,7 +207,8 @@ public class DynamoDBCustomerServiceTest {
         when(failingTable.putItem(any(Item.class))).thenThrow(RuntimeException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
-                failingTable
+                failingTable,
+                db.getByOrgNumberIndex()
         );
         Customer customer = getNewCustomer();
         customer.setIdentifier(UUID.randomUUID());
@@ -207,7 +223,8 @@ public class DynamoDBCustomerServiceTest {
         when(failingObjectMapper.writeValueAsString(any(Customer.class))).thenThrow(JsonProcessingException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 failingObjectMapper,
-                db.getTable()
+                db.getTable(),
+                db.getByOrgNumberIndex()
         );
         InputException exception = assertThrows(InputException.class,
             () -> failingService.customerToItem(getNewCustomer()));

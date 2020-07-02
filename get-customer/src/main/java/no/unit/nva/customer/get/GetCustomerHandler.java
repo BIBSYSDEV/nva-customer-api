@@ -14,6 +14,8 @@ import nva.commons.utils.Environment;
 import nva.commons.utils.JacocoGenerated;
 
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.http.HttpStatus.SC_OK;
 
@@ -23,6 +25,7 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
     public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
 
     private final CustomerService customerService;
+    private static final Logger logger = LoggerFactory.getLogger(GetCustomerHandler.class);
 
     /**
      * Default Constructor for GetCustomerHandler.
@@ -43,14 +46,14 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
      * @param environment   environment
      */
     public GetCustomerHandler(CustomerService customerService, Environment environment) {
-        super(Void.class, environment);
+        super(Void.class, environment, logger);
         this.customerService = customerService;
     }
 
     @Override
     protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        return customerService.getCustomer(getIdentifier(requestInfo));
+        return customerService.getCustomerByOrgNumber(getIdentifier(requestInfo));
     }
 
     protected UUID getIdentifier(RequestInfo requestInfo) throws ApiGatewayException {

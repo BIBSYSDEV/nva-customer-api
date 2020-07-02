@@ -2,8 +2,10 @@ package no.unit.nva.customer.service.impl;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class DynamoDBCustomerService implements CustomerService {
 
     public static final String TABLE_NAME = "TABLE_NAME";
+    public static final String BY_ORG_NUMBER_INDEX_NAME = "BY_ORG_NUMBER_INDEX_NAME";
     public static final String ERROR_MAPPING_ITEM_TO_CUSTOMER = "Error mapping Item to Customer";
     public static final String ERROR_MAPPING_CUSTOMER_TO_ITEM = "Error mapping Customer to Item";
     public static final String ERROR_WRITING_ITEM_TO_TABLE = "Error writing Item to Table";
@@ -34,6 +37,7 @@ public class DynamoDBCustomerService implements CustomerService {
             + "is not equal to identifier in customer object '%s'";
 
     private final Table table;
+    private final Index byOrgNumberIndex;
     private final ObjectMapper objectMapper;
 
     /**
@@ -45,19 +49,29 @@ public class DynamoDBCustomerService implements CustomerService {
      */
     public DynamoDBCustomerService(AmazonDynamoDB client, ObjectMapper objectMapper, Environment environment) {
         String tableName = environment.readEnv(TABLE_NAME);
+        String byOrgNumberIndexName = environment.readEnv(BY_ORG_NUMBER_INDEX_NAME);
         DynamoDB dynamoDB = new DynamoDB(client);
 
         this.table = dynamoDB.getTable(tableName);
+        this.byOrgNumberIndex = table.getIndex(byOrgNumberIndexName);
         this.objectMapper = objectMapper;
     }
 
-    public DynamoDBCustomerService(ObjectMapper objectMapper, Table table) {
+    /**
+     * Constructor for DynamoDBCustomerService.
+     *
+     * @param objectMapper  Jackson objectMapper
+     * @param table table name
+     * @param byOrgNumberIndex  index name
+     */
+    public DynamoDBCustomerService(ObjectMapper objectMapper, Table table, Index byOrgNumberIndex) {
         this.table = table;
+        this.byOrgNumberIndex = byOrgNumberIndex;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public Customer getCustomer(UUID identifier) throws ApiGatewayException {
+    public Customer getCustomerByOrgNumber(UUID identifier) throws ApiGatewayException {
         Item item;
         try {
             item = table.getItem(Customer.IDENTIFIER, identifier.toString());
@@ -66,6 +80,24 @@ public class DynamoDBCustomerService implements CustomerService {
         }
         if (item == null) {
             throw new NotFoundException(CUSTOMER_NOT_FOUND + identifier.toString());
+        }
+        return itemToCustomer(item);
+    }
+
+    @Override
+    public Customer getCustomerByOrgNumber(String orgNumber) throws ApiGatewayException {
+        Item item = null;
+        try {
+            ItemCollection<QueryOutcome> query = byOrgNumberIndex.query(Customer.ORG_NUMBER, orgNumber);
+            Iterator<Item> iterator = query.iterator();
+            if (iterator.hasNext()) {
+                item = iterator.next();
+            }
+        } catch (Exception e) {
+            throw new DynamoDBException(ERROR_READING_FROM_TABLE, e);
+        }
+        if (item == null) {
+            throw new NotFoundException(CUSTOMER_NOT_FOUND + orgNumber);
         }
         return itemToCustomer(item);
     }
@@ -83,9 +115,8 @@ public class DynamoDBCustomerService implements CustomerService {
 
     protected List<Customer> scanToCustomers(ItemCollection<ScanOutcome> scan) throws DynamoDBException {
         List<Customer> customers = new ArrayList<>();
-        Iterator<Item> iterator = scan.iterator();
-        while (iterator.hasNext()) {
-            customers.add(itemToCustomer(iterator.next()));
+        for (Item item: scan) {
+            customers.add(itemToCustomer(item));
         }
         return customers;
     }
@@ -99,7 +130,7 @@ public class DynamoDBCustomerService implements CustomerService {
         } catch (Exception e) {
             throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE, e);
         }
-        return getCustomer(identifier);
+        return getCustomerByOrgNumber(identifier);
     }
 
     @Override
@@ -112,7 +143,7 @@ public class DynamoDBCustomerService implements CustomerService {
         } catch (Exception e) {
             throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE, e);
         }
-        return getCustomer(identifier);
+        return getCustomerByOrgNumber(identifier);
     }
 
     private void validateIdentifier(UUID identifier, Customer customer) throws InputException {

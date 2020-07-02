@@ -16,9 +16,19 @@ Resources:
       AttributeDefinitions:
         - AttributeName: identifier
           AttributeType: S
+        - AttributeName: feideOrganizationId
+          AttributeType: S
       KeySchema:
         - AttributeName: identifier
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: byOrgNumber
+          KeySchema:
+            - AttributeName: feideOrganizationId
+              KeyType: HASH
+          Projection:
+#            NonKeyAttributes:
+            ProjectionType: ALL
 
 Outputs:
   NvaCustomersTableOutput:

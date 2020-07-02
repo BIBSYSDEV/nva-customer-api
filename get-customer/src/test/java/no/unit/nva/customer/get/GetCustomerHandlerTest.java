@@ -5,12 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
-import no.unit.nva.testutils.TestContext;
+import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.zalando.problem.Problem;
 
 import java.io.ByteArrayOutputStream;
@@ -23,7 +24,6 @@ import static no.unit.nva.customer.get.GetCustomerHandler.IDENTIFIER_IS_NOT_A_VA
 import static no.unit.nva.customer.testing.TestHeaders.getErrorResponseHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
-import static no.unit.nva.testutils.HandlerUtils.requestObjectToApiGatewayRequestInputSteam;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,8 +34,6 @@ import static org.zalando.problem.Status.BAD_REQUEST;
 public class GetCustomerHandlerTest {
 
     public static final String WILDCARD = "*";
-    public static final String HEADERS = "headers";
-    public static final String PATH_PARAMETERS = "pathParameters";
     public static final String REQUEST_ID = "requestId";
 
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
@@ -49,30 +47,31 @@ public class GetCustomerHandlerTest {
      * Setting up test environment.
      */
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
         environmentMock = mock(Environment.class);
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
         handler = new GetCustomerHandler(customerServiceMock, environmentMock);
         outputStream = new ByteArrayOutputStream();
-        context = new TestContext();
+        context = Mockito.mock(Context.class);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomer() throws Exception {
         UUID identifier = UUID.randomUUID();
         Customer customer = new Customer.Builder()
                 .withIdentifier(identifier)
                 .build();
-        when(customerServiceMock.getCustomer(identifier)).thenReturn(customer);
+        when(customerServiceMock.getCustomerByOrgNumber(identifier)).thenReturn(customer);
 
-        Map<String,String> headers = getRequestHeaders();
         Map<String, String> pathParameters = Map.of(IDENTIFIER, identifier.toString());
-        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
-                customer,
-                headers,
-                pathParameters,
-                null);
+        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+            .withBody(customer)
+            .withHeaders(getRequestHeaders())
+            .withPathParameters(pathParameters)
+            .build();
         handler.handleRequest(inputStream, outputStream, context);
 
         GatewayResponse<Customer> actual = objectMapper.readValue(
@@ -89,16 +88,15 @@ public class GetCustomerHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void requestToHandlerWithMalformedIdentifierReturnsBadRequest() throws Exception {
         String malformedIdentifier = "for-testing";
 
-        Map<String,String> headers = getRequestHeaders();
         Map<String, String> pathParameters = Map.of(IDENTIFIER, malformedIdentifier);
-        InputStream inputStream = requestObjectToApiGatewayRequestInputSteam(
-                null,
-                headers,
-                pathParameters,
-                null);
+        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+            .withHeaders(getRequestHeaders())
+            .withPathParameters(pathParameters)
+            .build();
 
         handler.handleRequest(inputStream, outputStream, context);
 
