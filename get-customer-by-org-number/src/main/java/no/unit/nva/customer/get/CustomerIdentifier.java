@@ -1,16 +1,16 @@
 package no.unit.nva.customer.get;
 
-import java.util.UUID;
+import java.net.URI;
 
 public class CustomerIdentifier {
 
-    private final UUID identifier;
+    private final URI identifier;
 
-    public CustomerIdentifier(UUID identifier) {
+    public CustomerIdentifier(URI identifier) {
         this.identifier = identifier;
     }
 
-    public UUID getIdentifier() {
+    public URI getIdentifier() {
         return identifier;
     }
 }

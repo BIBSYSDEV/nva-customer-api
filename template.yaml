@@ -244,7 +244,7 @@ Resources:
             properties:
               identifier:
                 type: string
-                format: uuid
+                format: uri
           Customer:
             type: object
             properties:
@@ -351,6 +351,9 @@ Resources:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
+          API_SCHEME: https
+          API_HOST: !Ref CustomDomain
+          API_BASE_PATH: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName

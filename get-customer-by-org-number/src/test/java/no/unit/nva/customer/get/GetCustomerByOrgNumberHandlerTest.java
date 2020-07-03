@@ -1,5 +1,8 @@
 package no.unit.nva.customer.get;
 
+import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_BASE_PATH;
+import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_HOST;
+import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_SCHEME;
 import static no.unit.nva.customer.testing.TestHeaders.getErrorResponseHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
@@ -34,6 +37,9 @@ public class GetCustomerByOrgNumberHandlerTest {
     public static final String REQUEST_ID = "requestId";
     public static final String SAMPLE_ORG_NUMBER = "123";
     public static final String EXPECTED_ERROR_MESSAGE = "Missing from pathParameters: orgNumber";
+    public static final String HTTPS = "https";
+    public static final String HOST = "nva.no";
+    public static final String BASE_PATH = "customer";
 
     private final ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerServiceMock;
@@ -49,6 +55,9 @@ public class GetCustomerByOrgNumberHandlerTest {
         customerServiceMock = mock(CustomerService.class);
         Environment environmentMock = mock(Environment.class);
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
+        when(environmentMock.readEnv(API_SCHEME)).thenReturn(HTTPS);
+        when(environmentMock.readEnv(API_HOST)).thenReturn(HOST);
+        when(environmentMock.readEnv(API_BASE_PATH)).thenReturn(BASE_PATH);
         handler = new GetCustomerByOrgNumberHandler(customerServiceMock, environmentMock);
         outputStream = new ByteArrayOutputStream();
         context = Mockito.mock(Context.class);
@@ -76,7 +85,7 @@ public class GetCustomerByOrgNumberHandlerTest {
             GatewayResponse.class);
 
         GatewayResponse<CustomerIdentifier> expected = new GatewayResponse<>(
-            objectMapper.writeValueAsString(new CustomerIdentifier(identifier)),
+            objectMapper.writeValueAsString(new CustomerIdentifier(handler.toUri(identifier))),
             getResponseHeaders(),
             HttpStatus.SC_OK
         );
