@@ -27,13 +27,14 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
     public static final String ERROR_BUILDING_CUSTOMER_IDENTIFIER = "Error building customer identifier";
     public static final String API_HOST = "API_HOST";
     public static final String API_SCHEME = "API_SCHEME";
+    public static final String API_BASE_PATH = "API_BASE_PATH";
 
     private final CustomerService customerService;
     private static final Logger logger = LoggerFactory.getLogger(GetCustomerByOrgNumberHandler.class);
 
     private final String apiScheme;
     private final String apiHost;
-    private static final String apiPath = "customer";
+    private final String apiBasePath;
 
     /**
      * Default Constructor for GetCustomerHandler.
@@ -58,6 +59,7 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
         this.customerService = customerService;
         this.apiScheme = environment.readEnv(API_SCHEME);
         this.apiHost = environment.readEnv(API_HOST);
+        this.apiBasePath = environment.readEnv(API_BASE_PATH);
     }
 
     @Override
@@ -76,7 +78,7 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
             identifier = new URIBuilder()
                 .setScheme(apiScheme)
                 .setHost(apiHost)
-                .setPathSegments(apiPath, customerIdentifier.toString())
+                .setPathSegments(apiBasePath, customerIdentifier.toString())
                 .build();
         } catch (URISyntaxException e) {
             throw new IllegalStateException(ERROR_BUILDING_CUSTOMER_IDENTIFIER, e);
