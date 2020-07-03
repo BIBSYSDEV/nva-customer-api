@@ -76,7 +76,7 @@ public class GetCustomerByOrgNumberHandlerTest {
             GatewayResponse.class);
 
         GatewayResponse<CustomerIdentifier> expected = new GatewayResponse<>(
-            objectMapper.writeValueAsString(new CustomerIdentifier(identifier)),
+            objectMapper.writeValueAsString(new CustomerIdentifier(handler.toUri(identifier))),
             getResponseHeaders(),
             HttpStatus.SC_OK
         );

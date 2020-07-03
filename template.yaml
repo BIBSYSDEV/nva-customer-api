@@ -244,7 +244,7 @@ Resources:
             properties:
               identifier:
                 type: string
-                format: uuid
+                format: uri
           Customer:
             type: object
             properties:
