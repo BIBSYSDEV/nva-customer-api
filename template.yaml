@@ -276,6 +276,9 @@ Resources:
                 format: email
               feideOrganizationId:
                 type: string
+              cristinId:
+                type: string
+                format: uri
           Problem:
             type: object
             properties:

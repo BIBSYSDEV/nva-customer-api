@@ -29,6 +29,7 @@ public class CustomerTest {
                 .withInstitutionDns("institution.dns")
                 .withAdministrationId("adminstr@ion.id")
                 .withFeideOrganizationId("123456789")
+                .withCristinId("http://cristin.id")
                 .build();
 
         Customer mappedCustomer = objectMapper.readValue(objectMapper.writeValueAsString(customer), Customer.class);
