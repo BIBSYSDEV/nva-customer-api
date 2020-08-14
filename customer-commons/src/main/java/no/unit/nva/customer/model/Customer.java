@@ -25,6 +25,7 @@ public class Customer {
     private String institutionDns;
     private String administrationId;
     private String feideOrganizationId;
+    private String cristinId;
 
     public Customer() {
     }
@@ -41,6 +42,7 @@ public class Customer {
         setInstitutionDns(builder.institutionDns);
         setAdministrationId(builder.administrationId);
         setFeideOrganizationId(builder.feideOrganizationId);
+        setCristinId(builder.cristinId);
     }
 
     public UUID getIdentifier() {
@@ -131,6 +133,14 @@ public class Customer {
         this.feideOrganizationId = feideOrganizationId;
     }
 
+    public String getCristinId() {
+        return cristinId;
+    }
+
+    public void setCristinId(String cristinId) {
+        this.cristinId = cristinId;
+    }
+
     @Override
     @JacocoGenerated
     public boolean equals(Object o) {
@@ -151,7 +161,8 @@ public class Customer {
                 && Objects.equals(getCname(), that.getCname())
                 && Objects.equals(getInstitutionDns(), that.getInstitutionDns())
                 && Objects.equals(getAdministrationId(), that.getAdministrationId())
-                && Objects.equals(getFeideOrganizationId(), that.getFeideOrganizationId());
+                && Objects.equals(getFeideOrganizationId(), that.getFeideOrganizationId())
+                && Objects.equals(getCristinId(), that.getCristinId());
     }
 
     @Override
@@ -159,7 +170,7 @@ public class Customer {
     public int hashCode() {
         return Objects.hash(getIdentifier(), getCreatedDate(), getModifiedDate(), getName(), getDisplayName(),
                 getShortName(), getArchiveName(), getCname(), getInstitutionDns(), getAdministrationId(),
-                getFeideOrganizationId());
+                getFeideOrganizationId(), getCristinId());
     }
 
 
@@ -175,6 +186,7 @@ public class Customer {
         private String institutionDns;
         private String administrationId;
         private String feideOrganizationId;
+        private String cristinId;
 
         public Builder() {
         }
@@ -231,6 +243,11 @@ public class Customer {
 
         public Builder withFeideOrganizationId(String feideOrganizationId) {
             this.feideOrganizationId = feideOrganizationId;
+            return this;
+        }
+
+        public Builder withCristinId(String cristinId) {
+            this.cristinId = cristinId;
             return this;
         }
 

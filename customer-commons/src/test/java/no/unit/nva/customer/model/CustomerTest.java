@@ -1,14 +1,15 @@
 package no.unit.nva.customer.model;
 
+import static no.unit.nva.hamcrest.DoesNotHaveNullOrEmptyFields.doesNotHaveNullOrEmptyFields;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.unit.nva.customer.ObjectMapperConfig;
-import org.junit.jupiter.api.Test;
-
 import java.time.Instant;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import no.unit.nva.customer.ObjectMapperConfig;
+import org.junit.jupiter.api.Test;
 
 public class CustomerTest {
 
@@ -29,11 +30,13 @@ public class CustomerTest {
                 .withInstitutionDns("institution.dns")
                 .withAdministrationId("adminstr@ion.id")
                 .withFeideOrganizationId("123456789")
+                .withCristinId("http://cristin.id")
                 .build();
 
         Customer mappedCustomer = objectMapper.readValue(objectMapper.writeValueAsString(customer), Customer.class);
 
         assertEquals(customer, mappedCustomer);
+        assertThat(customer, doesNotHaveNullOrEmptyFields());
     }
 
 }
