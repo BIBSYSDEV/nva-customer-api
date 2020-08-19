@@ -38,6 +38,7 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> 
     }
 
 
+    @JacocoGenerated
     private static DynamoDBCustomerService defaultDynamoDBCustomerService(Environment environment) {
         return new DynamoDBCustomerService(
             AmazonDynamoDBClientBuilder.defaultClient(),
