@@ -1,6 +1,7 @@
 package no.unit.nva.customer.service.impl;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.local.embedded.DynamoDBEmbedded;
@@ -62,8 +63,8 @@ public class DynamoDBCustomerServiceTest {
         service = new DynamoDBCustomerService(
                 objectMapper,
                 db.getTable(),
-                db.getByOrgNumberIndex(),
-                db.getByCristinIdIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
     }
 
@@ -176,8 +177,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
                 failingTable,
-                db.getByOrgNumberIndex(),
-                db.getByCristinIdIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.getCustomer(UUID.randomUUID()));
@@ -191,8 +192,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
                 failingTable,
-                db.getByOrgNumberIndex(),
-                db.getByCristinIdIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.getCustomers());   
@@ -206,8 +207,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
                 failingTable,
-                db.getByOrgNumberIndex(),
-                db.getByCristinIdIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.createCustomer(getNewCustomer()));
@@ -222,8 +223,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
                 failingTable,
-                db.getByOrgNumberIndex(),
-                db.getByCristinIdIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         Customer customer = getNewCustomer();
         customer.setIdentifier(UUID.randomUUID());
@@ -239,8 +240,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 failingObjectMapper,
                 db.getTable(),
-                db.getByOrgNumberIndex(),
-                db.getByCristinIdIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         InputException exception = assertThrows(InputException.class,
             () -> failingService.customerToItem(getNewCustomer()));
@@ -272,6 +273,14 @@ public class DynamoDBCustomerServiceTest {
                 .withFeideOrganizationId("123456789")
                 .withCristinId("http://cristin.id")
                 .build();
+    }
+
+    private Index getByOrgNumberIndex() {
+        return db.getIndex(CustomerDynamoDBLocal.BY_ORG_NUMBER_INDEX_NAME);
+    }
+
+    private Index getByCristinIdIndex() {
+        return db.getIndex(CustomerDynamoDBLocal.BY_CRISTIN_ID_INDEX_NAME);
     }
 
 }

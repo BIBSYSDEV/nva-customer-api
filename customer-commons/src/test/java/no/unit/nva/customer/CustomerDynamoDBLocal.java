@@ -45,12 +45,8 @@ public class CustomerDynamoDBLocal extends ExternalResource {
         return client.getTable(NVA_CUSTOMERS_TABLE_NAME);
     }
 
-    public Index getByOrgNumberIndex() {
-        return client.getTable(NVA_CUSTOMERS_TABLE_NAME).getIndex(BY_ORG_NUMBER_INDEX_NAME);
-    }
-
-    public Index getByCristinIdIndex() {
-        return client.getTable(NVA_CUSTOMERS_TABLE_NAME).getIndex(BY_CRISTIN_ID_INDEX_NAME);
+    public Index getIndex(String indexName) {
+        return client.getTable(NVA_CUSTOMERS_TABLE_NAME).getIndex(indexName);
     }
 
     private void createCustomerTable(AmazonDynamoDB ddb) {
