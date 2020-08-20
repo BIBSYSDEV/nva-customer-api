@@ -12,62 +12,60 @@ import nva.commons.handlers.ApiGatewayHandler;
 import nva.commons.handlers.RequestInfo;
 import nva.commons.utils.Environment;
 import nva.commons.utils.JacocoGenerated;
-
-import java.util.UUID;
+import nva.commons.utils.RequestUtils;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.http.HttpStatus.SC_OK;
+public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Customer> {
 
-public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
-
-    public static final String IDENTIFIER = "identifier";
-    public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
+    public static final String CRISTIN_ID = "cristinId";
 
     private final CustomerService customerService;
-    private static final Logger logger = LoggerFactory.getLogger(GetCustomerHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(GetCustomerByCristinIdHandler.class);
 
     /**
-     * Default Constructor for GetCustomerHandler.
+     * Default Constructor for GetCustomerByCristinIdHandler.
      */
     @JacocoGenerated
-    public GetCustomerHandler() {
+    public GetCustomerByCristinIdHandler() {
         this(new DynamoDBCustomerService(
-                AmazonDynamoDBClientBuilder.defaultClient(),
-                ObjectMapperConfig.objectMapper,
-                new Environment()
+            AmazonDynamoDBClientBuilder.defaultClient(),
+            ObjectMapperConfig.objectMapper,
+            new Environment()
         ), new Environment());
     }
 
     /**
-     * Constructor for CreateCustomerHandler.
+     * Constructor for GetCustomerByCristinIdHandler.
      *
      * @param customerService customerService
      * @param environment   environment
      */
-    public GetCustomerHandler(CustomerService customerService, Environment environment) {
+    public GetCustomerByCristinIdHandler(CustomerService customerService, Environment environment) {
         super(Void.class, environment, logger);
         this.customerService = customerService;
     }
 
     @Override
     protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
-            throws ApiGatewayException {
-        return customerService.getCustomer(getIdentifier(requestInfo));
+        throws ApiGatewayException {
+        String cristinId = getCristinId(requestInfo);
+        Customer customer = customerService.getCustomerByCristinId(cristinId);
+
+        return customer;
     }
 
-    protected UUID getIdentifier(RequestInfo requestInfo) throws ApiGatewayException {
-        String identifier = null;
+    private String getCristinId(RequestInfo requestInfo) throws InputException {
         try {
-            identifier = requestInfo.getPathParameters().get(IDENTIFIER);
-            return UUID.fromString(identifier);
-        } catch (Exception e) {
-            throw new InputException(IDENTIFIER_IS_NOT_A_VALID_UUID + identifier, e);
+            return RequestUtils.getPathParameter(requestInfo, CRISTIN_ID);
+        } catch (IllegalArgumentException e) {
+            throw new InputException(e.getMessage(), e);
         }
     }
 
     @Override
     protected Integer getSuccessStatusCode(Void input, Customer output) {
-        return SC_OK;
+        return HttpStatus.SC_OK;
     }
 }

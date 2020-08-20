@@ -12,7 +12,7 @@ public class Customer {
 
     public static final String IDENTIFIER = "identifier";
     public static final String ORG_NUMBER = "feideOrganizationId";
-
+    public static final String CRISTIN_ID = "cristinId";
 
     private UUID identifier;
     private Instant createdDate;
