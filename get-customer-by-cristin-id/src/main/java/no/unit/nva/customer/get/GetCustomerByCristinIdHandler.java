@@ -32,6 +32,7 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
         this(defaultCustomerService(), new Environment());
     }
 
+    @JacocoGenerated
     private static DynamoDBCustomerService defaultCustomerService() {
         return new DynamoDBCustomerService(
             AmazonDynamoDBClientBuilder.defaultClient(),
