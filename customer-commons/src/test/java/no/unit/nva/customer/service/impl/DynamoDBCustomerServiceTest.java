@@ -1,29 +1,5 @@
 package no.unit.nva.customer.service.impl;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Index;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.local.embedded.DynamoDBEmbedded;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.unit.nva.customer.CustomerDynamoDBLocal;
-import no.unit.nva.customer.ObjectMapperConfig;
-import no.unit.nva.customer.exception.DynamoDBException;
-import no.unit.nva.customer.exception.InputException;
-import no.unit.nva.customer.exception.NotFoundException;
-import no.unit.nva.customer.model.Customer;
-import no.unit.nva.customer.service.CustomerService;
-import nva.commons.utils.Environment;
-import org.junit.Rule;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.BY_CRISTIN_ID_INDEX_NAME;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.BY_ORG_NUMBER_INDEX_NAME;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_MAPPING_CUSTOMER_TO_ITEM;
@@ -39,6 +15,31 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Index;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.local.embedded.DynamoDBEmbedded;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+import no.unit.nva.customer.CustomerDynamoDBLocal;
+import no.unit.nva.customer.ObjectMapperConfig;
+import no.unit.nva.customer.exception.DynamoDBException;
+import no.unit.nva.customer.exception.InputException;
+import no.unit.nva.customer.exception.NotFoundException;
+import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.service.CustomerService;
+import nva.commons.utils.Environment;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
 @EnableRuleMigrationSupport
 public class DynamoDBCustomerServiceTest {
@@ -167,7 +168,9 @@ public class DynamoDBCustomerServiceTest {
     @Test
     public void getCustomerNotFoundThrowsException() {
         UUID nonExistingCustomer = UUID.randomUUID();
-        assertThrows(NotFoundException.class, () -> service.getCustomer(nonExistingCustomer));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> service.getCustomer(nonExistingCustomer));
+        MatcherAssert.assertThat(exception.getMessage(), Matchers.containsString(nonExistingCustomer.toString()));
     }
 
     @Test

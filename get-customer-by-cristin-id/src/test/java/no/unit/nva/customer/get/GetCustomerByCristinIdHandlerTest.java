@@ -3,6 +3,8 @@ package no.unit.nva.customer.get;
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static nva.commons.handlers.ApiGatewayHandler.ALLOWED_ORIGIN_ENV;
 import static nva.commons.utils.JsonUtils.objectMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,16 +14,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
+import no.unit.nva.customer.exception.NotFoundException;
 import no.unit.nva.customer.model.Customer;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.zalando.problem.Problem;
 
 public class GetCustomerByCristinIdHandlerTest {
 
@@ -58,11 +63,32 @@ public class GetCustomerByCristinIdHandlerTest {
 
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<Customer> response = objectMapper.readValue(
-            outputStream.toByteArray(),
-            GatewayResponse.class);
+        GatewayResponse<Customer> response = GatewayResponse.fromOutputStream(outputStream);
 
-        Assertions.assertNotNull(response.getBodyObject(Customer.class));
+        assertNotNull(response.getBodyObject(Customer.class));
+        assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+    }
+
+    @Test
+    public void handleRequestReturnsNotFoundOnInvalidCristinId() throws Exception {
+        prepareMocksWithMissingCustomer();
+
+        Map<String, String> pathParameters = Map.of(GetCustomerByCristinIdHandler.CRISTIN_ID, SAMPLE_CRISTIN_ID);
+        InputStream inputStream = new HandlerRequestBuilder<Void>(objectMapper)
+            .withHeaders(getRequestHeaders())
+            .withPathParameters(pathParameters)
+            .build();
+
+        handler.handleRequest(inputStream, outputStream, context);
+
+        GatewayResponse<Problem> response = GatewayResponse.fromOutputStream(outputStream);
+
+        assertNotNull(response.getBodyObject(Problem.class));
+        assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
+    }
+
+    private void prepareMocksWithMissingCustomer() throws ApiGatewayException {
+        when(customerService.getCustomerByCristinId(SAMPLE_CRISTIN_ID)).thenThrow(NotFoundException.class);
     }
 
     private void prepareMocksWithExistingCustomer() throws ApiGatewayException {
