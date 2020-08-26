@@ -26,16 +26,24 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> 
     private final CustomerService customerService;
     private static final Logger logger = LoggerFactory.getLogger(UpdateCustomerHandler.class);
 
-    /**
-     * Default Constructor for UpdateCustomerHandler.
-     */
+
     @JacocoGenerated
     public UpdateCustomerHandler() {
-        this(new DynamoDBCustomerService(
-                AmazonDynamoDBClientBuilder.defaultClient(),
-                ObjectMapperConfig.objectMapper,
-                new Environment()
-        ), new Environment());
+        this(new Environment());
+    }
+
+    @JacocoGenerated
+    public UpdateCustomerHandler(Environment environment) {
+        this(defaultDynamoDBCustomerService(environment), environment);
+    }
+
+
+    @JacocoGenerated
+    private static DynamoDBCustomerService defaultDynamoDBCustomerService(Environment environment) {
+        return new DynamoDBCustomerService(
+            AmazonDynamoDBClientBuilder.defaultClient(),
+            ObjectMapperConfig.objectMapper,
+            environment);
     }
 
     /**
