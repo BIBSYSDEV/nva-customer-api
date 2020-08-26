@@ -428,10 +428,10 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
       Events:
-        GetByOrgNumberEvent:
+        GetByCristinIdEvent:
           Type: Api
           Properties:
-            Path: /orgNumber/{orgNumber}
+            Path: /cristinId/{cristinId}
             Method: get
             RestApiId: !Ref NvaCustomerApi
   NvaGetAllCustomersFunction:
