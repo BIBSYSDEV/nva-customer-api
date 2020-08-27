@@ -1,14 +1,13 @@
 package no.unit.nva.customer.service;
 
+import java.util.List;
+import java.util.UUID;
 import no.unit.nva.customer.model.Customer;
 import nva.commons.exceptions.ApiGatewayException;
 
-import java.util.List;
-import java.util.UUID;
-
 public interface CustomerService {
 
-    Customer getCustomerByOrgNumber(UUID identifier) throws ApiGatewayException;
+    Customer getCustomer(UUID identifier) throws ApiGatewayException;
 
     Customer getCustomerByOrgNumber(String orgNumber) throws ApiGatewayException;
 
@@ -18,4 +17,5 @@ public interface CustomerService {
 
     Customer updateCustomer(UUID identifier, Customer customer) throws ApiGatewayException;
 
+    Customer getCustomerByCristinId(String cristinId) throws ApiGatewayException;
 }

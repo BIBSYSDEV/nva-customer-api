@@ -18,6 +18,8 @@ Resources:
           AttributeType: S
         - AttributeName: feideOrganizationId
           AttributeType: S
+        - AttributeName: cristinId
+          AttributeType: S
       KeySchema:
         - AttributeName: identifier
           KeyType: HASH
@@ -27,7 +29,12 @@ Resources:
             - AttributeName: feideOrganizationId
               KeyType: HASH
           Projection:
-#            NonKeyAttributes:
+            ProjectionType: ALL
+        - IndexName: byCristinId
+          KeySchema:
+            - AttributeName: cristinId
+              KeyType: HASH
+          Projection:
             ProjectionType: ALL
 
 Outputs:

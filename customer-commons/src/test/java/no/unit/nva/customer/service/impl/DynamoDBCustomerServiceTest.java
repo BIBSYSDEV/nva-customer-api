@@ -1,28 +1,6 @@
 package no.unit.nva.customer.service.impl;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.local.embedded.DynamoDBEmbedded;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.unit.nva.customer.CustomerDynamoDBLocal;
-import no.unit.nva.customer.ObjectMapperConfig;
-import no.unit.nva.customer.exception.DynamoDBException;
-import no.unit.nva.customer.exception.InputException;
-import no.unit.nva.customer.exception.NotFoundException;
-import no.unit.nva.customer.model.Customer;
-import no.unit.nva.customer.service.CustomerService;
-import nva.commons.utils.Environment;
-import org.junit.Rule;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
+import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.BY_CRISTIN_ID_INDEX_NAME;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.BY_ORG_NUMBER_INDEX_NAME;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_MAPPING_CUSTOMER_TO_ITEM;
 import static no.unit.nva.customer.service.impl.DynamoDBCustomerService.ERROR_MAPPING_ITEM_TO_CUSTOMER;
@@ -37,6 +15,31 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Index;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.local.embedded.DynamoDBEmbedded;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+import no.unit.nva.customer.CustomerDynamoDBLocal;
+import no.unit.nva.customer.ObjectMapperConfig;
+import no.unit.nva.customer.exception.DynamoDBException;
+import no.unit.nva.customer.exception.InputException;
+import no.unit.nva.customer.exception.NotFoundException;
+import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.service.CustomerService;
+import nva.commons.utils.Environment;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
 @EnableRuleMigrationSupport
 public class DynamoDBCustomerServiceTest {
@@ -61,7 +64,8 @@ public class DynamoDBCustomerServiceTest {
         service = new DynamoDBCustomerService(
                 objectMapper,
                 db.getTable(),
-                db.getByOrgNumberIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
     }
 
@@ -69,6 +73,7 @@ public class DynamoDBCustomerServiceTest {
     public void testConstructorThrowsNoExceptions() {
         when(environment.readEnv(TABLE_NAME)).thenReturn(NVA_CUSTOMERS_TEST);
         when(environment.readEnv(BY_ORG_NUMBER_INDEX_NAME)).thenReturn(NVA_CUSTOMERS_TEST);
+        when(environment.readEnv(BY_CRISTIN_ID_INDEX_NAME)).thenReturn(NVA_CUSTOMERS_TEST);
         CustomerService serviceWithTableNameFromEnv = new DynamoDBCustomerService(client, objectMapper, environment);
         assertNotNull(serviceWithTableNameFromEnv);
     }
@@ -129,7 +134,7 @@ public class DynamoDBCustomerServiceTest {
     public void getExistingCustomerReturnsTheCustomer() throws Exception {
         Customer customer = getNewCustomer();
         Customer createdCustomer = service.createCustomer(customer);
-        Customer getCustomer = service.getCustomerByOrgNumber(createdCustomer.getIdentifier());
+        Customer getCustomer = service.getCustomer(createdCustomer.getIdentifier());
         assertEquals(createdCustomer, getCustomer);
     }
 
@@ -138,6 +143,14 @@ public class DynamoDBCustomerServiceTest {
         Customer customer = getNewCustomer();
         Customer createdCustomer = service.createCustomer(customer);
         Customer getCustomer = service.getCustomerByOrgNumber(createdCustomer.getFeideOrganizationId());
+        assertEquals(createdCustomer, getCustomer);
+    }
+
+    @Test
+    public void getCustomerByCristinIdReturnsTheCustomer() throws Exception {
+        Customer customer = getNewCustomer();
+        Customer createdCustomer = service.createCustomer(customer);
+        Customer getCustomer = service.getCustomerByCristinId(createdCustomer.getCristinId());
         assertEquals(createdCustomer, getCustomer);
     }
 
@@ -155,7 +168,9 @@ public class DynamoDBCustomerServiceTest {
     @Test
     public void getCustomerNotFoundThrowsException() {
         UUID nonExistingCustomer = UUID.randomUUID();
-        assertThrows(NotFoundException.class, () -> service.getCustomerByOrgNumber(nonExistingCustomer));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> service.getCustomer(nonExistingCustomer));
+        MatcherAssert.assertThat(exception.getMessage(), Matchers.containsString(nonExistingCustomer.toString()));
     }
 
     @Test
@@ -165,10 +180,11 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
                 failingTable,
-                db.getByOrgNumberIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
-            () -> failingService.getCustomerByOrgNumber(UUID.randomUUID()));
+            () -> failingService.getCustomer(UUID.randomUUID()));
         assertEquals(ERROR_READING_FROM_TABLE, exception.getMessage());
     }
 
@@ -179,7 +195,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
                 failingTable,
-                db.getByOrgNumberIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.getCustomers());   
@@ -193,7 +210,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
                 failingTable,
-                db.getByOrgNumberIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.createCustomer(getNewCustomer()));
@@ -208,7 +226,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 objectMapper,
                 failingTable,
-                db.getByOrgNumberIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         Customer customer = getNewCustomer();
         customer.setIdentifier(UUID.randomUUID());
@@ -224,7 +243,8 @@ public class DynamoDBCustomerServiceTest {
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 failingObjectMapper,
                 db.getTable(),
-                db.getByOrgNumberIndex()
+                getByOrgNumberIndex(),
+                getByCristinIdIndex()
         );
         InputException exception = assertThrows(InputException.class,
             () -> failingService.customerToItem(getNewCustomer()));
@@ -256,6 +276,14 @@ public class DynamoDBCustomerServiceTest {
                 .withFeideOrganizationId("123456789")
                 .withCristinId("http://cristin.id")
                 .build();
+    }
+
+    private Index getByOrgNumberIndex() {
+        return db.getIndex(CustomerDynamoDBLocal.BY_ORG_NUMBER_INDEX_NAME);
+    }
+
+    private Index getByCristinIdIndex() {
+        return db.getIndex(CustomerDynamoDBLocal.BY_CRISTIN_ID_INDEX_NAME);
     }
 
 }

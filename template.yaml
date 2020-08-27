@@ -39,6 +39,9 @@ Parameters:
   CustomersByOrgNumberIndexName:
     Type: String
     Description: Reference to index containing Customers by org number
+  CustomersByCristinIdIndexName:
+    Type: String
+    Description: Reference to index containing Customers by cristin id
 
 Resources:
   ApiAccessLogGroup:
@@ -238,6 +241,44 @@ Resources:
                   description: Bad Gateway
                   schema:
                     $ref: '#/definitions/Problem'
+          /cristinId/{cristinId}:
+            get:
+              summary: Get Customer by cristinId
+              consumes:
+                - application/json
+              produces:
+                - application/json
+              security:
+                - CognitoUserPool: []
+              parameters:
+                - in: path
+                  name: cristinId
+                  type: string
+                  required: true
+                  description: CristinId of the Customer to get.
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}/invocations
+                responses: {}
+                httpMethod: POST
+                type: AWS_PROXY
+              responses:
+                '200':
+                  description: OK
+                  schema:
+                    $ref: '#/definitions/Customer'
+                '400':
+                  description: Bad Request
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '404':
+                  description: Not Found
+                  schema:
+                    $ref: '#/definitions/Problem'
+                '502':
+                  description: Bad Gateway
+                  schema:
+                    $ref: '#/definitions/Problem'
         definitions:
           CustomerIdentifier:
             type: object
@@ -310,6 +351,7 @@ Resources:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
+          BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -332,6 +374,7 @@ Resources:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
+          BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -354,6 +397,7 @@ Resources:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
+          BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
           API_SCHEME: https
           API_HOST: !Ref CustomDomain
           API_BASE_PATH: !Ref CustomDomainBasePath
@@ -365,6 +409,29 @@ Resources:
           Type: Api
           Properties:
             Path: /orgNumber/{orgNumber}
+            Method: get
+            RestApiId: !Ref NvaCustomerApi
+  NvaGetCustomerByCristinIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get-customer-by-cristin-id
+      Handler: no.unit.nva.customer.get.GetCustomerByCristinIdHandler::handleRequest
+      Runtime: java11
+      MemorySize: 1408
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: '*'
+          TABLE_NAME: !Ref CustomersTableName
+          BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
+          BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTableName
+      Events:
+        GetByCristinIdEvent:
+          Type: Api
+          Properties:
+            Path: /cristinId/{cristinId}
             Method: get
             RestApiId: !Ref NvaCustomerApi
   NvaGetAllCustomersFunction:
@@ -379,6 +446,7 @@ Resources:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
+          BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -401,6 +469,7 @@ Resources:
           ALLOWED_ORIGIN: '*'
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
+          BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
