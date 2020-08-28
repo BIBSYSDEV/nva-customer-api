@@ -21,7 +21,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, CustomerIdentifier> {
+public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, CustomerIdentifiers> {
 
     public static final String ORG_NUMBER = "orgNumber";
     public static final String ERROR_BUILDING_CUSTOMER_IDENTIFIER = "Error building customer identifier";
@@ -63,13 +63,14 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
     }
 
     @Override
-    protected CustomerIdentifier processInput(Void input, RequestInfo requestInfo, Context context)
+    protected CustomerIdentifiers processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         String orgNumber = getOrgNumber(requestInfo);
         Customer customer = customerService.getCustomerByOrgNumber(orgNumber);
 
         URI identifier = toUri(customer.getIdentifier());
-        return new CustomerIdentifier(identifier);
+        URI cristinId = URI.create(customer.getCristinId());
+        return new CustomerIdentifiers(identifier, cristinId);
     }
 
     protected URI toUri(UUID customerIdentifier) {
@@ -95,7 +96,7 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Void input, CustomerIdentifier output) {
+    protected Integer getSuccessStatusCode(Void input, CustomerIdentifiers output) {
         return HttpStatus.SC_OK;
     }
 }

@@ -207,7 +207,7 @@ Resources:
                     $ref: '#/definitions/Problem'
           /orgNumber/{orgNumber}:
             get:
-              summary: Get CustomerIdentifier by orgNumber
+              summary: Get CustomerIdentifiers by orgNumber
               consumes:
                 - application/json
               produces:
@@ -217,7 +217,7 @@ Resources:
                   name: orgNumber
                   type: string
                   required: true
-                  description: OrgNumber of the CustomerIdentifier to get.
+                  description: OrgNumber of the CustomerIdentifiers to get.
               x-amazon-apigateway-integration:
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}/invocations
@@ -228,7 +228,7 @@ Resources:
                 '200':
                   description: OK
                   schema:
-                    $ref: '#/definitions/CustomerIdentifier'
+                    $ref: '#/definitions/CustomerIdentifiers'
                 '400':
                   description: Bad Request
                   schema:
@@ -280,10 +280,13 @@ Resources:
                   schema:
                     $ref: '#/definitions/Problem'
         definitions:
-          CustomerIdentifier:
+          CustomerIdentifiers:
             type: object
             properties:
               identifier:
+                type: string
+                format: uri
+              cristinId:
                 type: string
                 format: uri
           Customer:

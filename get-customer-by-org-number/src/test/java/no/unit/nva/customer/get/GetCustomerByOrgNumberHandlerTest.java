@@ -17,6 +17,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 import no.unit.nva.customer.ObjectMapperConfig;
@@ -40,6 +41,7 @@ public class GetCustomerByOrgNumberHandlerTest {
     public static final String HTTPS = "https";
     public static final String HOST = "nva.no";
     public static final String BASE_PATH = "customer";
+    public static final String SAMPLE_CRISTIN_ID = "http://cristin.id";
 
     private final ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerServiceMock;
@@ -70,6 +72,7 @@ public class GetCustomerByOrgNumberHandlerTest {
         Customer customer = new Customer.Builder()
             .withIdentifier(identifier)
             .withFeideOrganizationId(SAMPLE_ORG_NUMBER)
+            .withCristinId(SAMPLE_CRISTIN_ID)
             .build();
         when(customerServiceMock.getCustomerByOrgNumber(SAMPLE_ORG_NUMBER)).thenReturn(customer);
 
@@ -80,12 +83,14 @@ public class GetCustomerByOrgNumberHandlerTest {
             .build();
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<CustomerIdentifier> actual = objectMapper.readValue(
+        GatewayResponse<CustomerIdentifiers> actual = objectMapper.readValue(
             outputStream.toByteArray(),
             GatewayResponse.class);
 
-        GatewayResponse<CustomerIdentifier> expected = new GatewayResponse<>(
-            objectMapper.writeValueAsString(new CustomerIdentifier(handler.toUri(identifier))),
+        GatewayResponse<CustomerIdentifiers> expected = new GatewayResponse<>(
+            objectMapper.writeValueAsString(
+                new CustomerIdentifiers(handler.toUri(identifier),
+                    URI.create(SAMPLE_CRISTIN_ID))),
             getResponseHeaders(),
             HttpStatus.SC_OK
         );
