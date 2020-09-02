@@ -23,7 +23,6 @@ public class Customer {
     private String archiveName;
     private String cname;
     private String institutionDns;
-    private String administrationId;
     private String feideOrganizationId;
     private String cristinId;
 
@@ -40,7 +39,6 @@ public class Customer {
         setArchiveName(builder.archiveName);
         setCname(builder.cname);
         setInstitutionDns(builder.institutionDns);
-        setAdministrationId(builder.administrationId);
         setFeideOrganizationId(builder.feideOrganizationId);
         setCristinId(builder.cristinId);
     }
@@ -117,13 +115,6 @@ public class Customer {
         this.institutionDns = institutionDns;
     }
 
-    public String getAdministrationId() {
-        return administrationId;
-    }
-
-    public void setAdministrationId(String administrationId) {
-        this.administrationId = administrationId;
-    }
 
     public String getFeideOrganizationId() {
         return feideOrganizationId;
@@ -160,7 +151,6 @@ public class Customer {
                 && Objects.equals(getArchiveName(), that.getArchiveName())
                 && Objects.equals(getCname(), that.getCname())
                 && Objects.equals(getInstitutionDns(), that.getInstitutionDns())
-                && Objects.equals(getAdministrationId(), that.getAdministrationId())
                 && Objects.equals(getFeideOrganizationId(), that.getFeideOrganizationId())
                 && Objects.equals(getCristinId(), that.getCristinId());
     }
@@ -169,8 +159,8 @@ public class Customer {
     @JacocoGenerated
     public int hashCode() {
         return Objects.hash(getIdentifier(), getCreatedDate(), getModifiedDate(), getName(), getDisplayName(),
-                getShortName(), getArchiveName(), getCname(), getInstitutionDns(), getAdministrationId(),
-                getFeideOrganizationId(), getCristinId());
+                getShortName(), getArchiveName(), getCname(), getInstitutionDns(), getFeideOrganizationId(),
+            getCristinId());
     }
 
 
@@ -184,7 +174,6 @@ public class Customer {
         private String archiveName;
         private String cname;
         private String institutionDns;
-        private String administrationId;
         private String feideOrganizationId;
         private String cristinId;
 
@@ -233,11 +222,6 @@ public class Customer {
 
         public Builder withInstitutionDns(String institutionDns) {
             this.institutionDns = institutionDns;
-            return this;
-        }
-
-        public Builder withAdministrationId(String administrationId) {
-            this.administrationId = administrationId;
             return this;
         }
 

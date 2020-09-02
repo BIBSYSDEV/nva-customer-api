@@ -28,7 +28,6 @@ public class CustomerTest {
                 .withArchiveName("Archive Name")
                 .withCname("CNAME")
                 .withInstitutionDns("institution.dns")
-                .withAdministrationId("adminstr@ion.id")
                 .withFeideOrganizationId("123456789")
                 .withCristinId("http://cristin.id")
                 .build();

@@ -315,9 +315,6 @@ Resources:
                 type: string
               institutionDns:
                 type: string
-              administrationId:
-                type: string
-                format: email
               feideOrganizationId:
                 type: string
               cristinId:
