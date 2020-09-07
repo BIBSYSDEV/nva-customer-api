@@ -12,7 +12,7 @@ public class Customer {
 
     public static final String IDENTIFIER = "identifier";
     public static final String ORG_NUMBER = "feideOrganizationId";
-
+    public static final String CRISTIN_ID = "cristinId";
 
     private UUID identifier;
     private Instant createdDate;
@@ -23,8 +23,8 @@ public class Customer {
     private String archiveName;
     private String cname;
     private String institutionDns;
-    private String administrationId;
     private String feideOrganizationId;
+    private String cristinId;
 
     public Customer() {
     }
@@ -39,8 +39,8 @@ public class Customer {
         setArchiveName(builder.archiveName);
         setCname(builder.cname);
         setInstitutionDns(builder.institutionDns);
-        setAdministrationId(builder.administrationId);
         setFeideOrganizationId(builder.feideOrganizationId);
+        setCristinId(builder.cristinId);
     }
 
     public UUID getIdentifier() {
@@ -115,13 +115,6 @@ public class Customer {
         this.institutionDns = institutionDns;
     }
 
-    public String getAdministrationId() {
-        return administrationId;
-    }
-
-    public void setAdministrationId(String administrationId) {
-        this.administrationId = administrationId;
-    }
 
     public String getFeideOrganizationId() {
         return feideOrganizationId;
@@ -129,6 +122,14 @@ public class Customer {
 
     public void setFeideOrganizationId(String feideOrganizationId) {
         this.feideOrganizationId = feideOrganizationId;
+    }
+
+    public String getCristinId() {
+        return cristinId;
+    }
+
+    public void setCristinId(String cristinId) {
+        this.cristinId = cristinId;
     }
 
     @Override
@@ -150,16 +151,16 @@ public class Customer {
                 && Objects.equals(getArchiveName(), that.getArchiveName())
                 && Objects.equals(getCname(), that.getCname())
                 && Objects.equals(getInstitutionDns(), that.getInstitutionDns())
-                && Objects.equals(getAdministrationId(), that.getAdministrationId())
-                && Objects.equals(getFeideOrganizationId(), that.getFeideOrganizationId());
+                && Objects.equals(getFeideOrganizationId(), that.getFeideOrganizationId())
+                && Objects.equals(getCristinId(), that.getCristinId());
     }
 
     @Override
     @JacocoGenerated
     public int hashCode() {
         return Objects.hash(getIdentifier(), getCreatedDate(), getModifiedDate(), getName(), getDisplayName(),
-                getShortName(), getArchiveName(), getCname(), getInstitutionDns(), getAdministrationId(),
-                getFeideOrganizationId());
+                getShortName(), getArchiveName(), getCname(), getInstitutionDns(), getFeideOrganizationId(),
+            getCristinId());
     }
 
 
@@ -173,8 +174,8 @@ public class Customer {
         private String archiveName;
         private String cname;
         private String institutionDns;
-        private String administrationId;
         private String feideOrganizationId;
+        private String cristinId;
 
         public Builder() {
         }
@@ -224,13 +225,13 @@ public class Customer {
             return this;
         }
 
-        public Builder withAdministrationId(String administrationId) {
-            this.administrationId = administrationId;
+        public Builder withFeideOrganizationId(String feideOrganizationId) {
+            this.feideOrganizationId = feideOrganizationId;
             return this;
         }
 
-        public Builder withFeideOrganizationId(String feideOrganizationId) {
-            this.feideOrganizationId = feideOrganizationId;
+        public Builder withCristinId(String cristinId) {
+            this.cristinId = cristinId;
             return this;
         }
 

@@ -1,5 +1,8 @@
 package no.unit.nva.customer.get;
 
+import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_BASE_PATH;
+import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_HOST;
+import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_SCHEME;
 import static no.unit.nva.customer.testing.TestHeaders.getErrorResponseHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
@@ -14,6 +17,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 import no.unit.nva.customer.ObjectMapperConfig;
@@ -34,6 +38,10 @@ public class GetCustomerByOrgNumberHandlerTest {
     public static final String REQUEST_ID = "requestId";
     public static final String SAMPLE_ORG_NUMBER = "123";
     public static final String EXPECTED_ERROR_MESSAGE = "Missing from pathParameters: orgNumber";
+    public static final String HTTPS = "https";
+    public static final String HOST = "nva.no";
+    public static final String BASE_PATH = "customer";
+    public static final String SAMPLE_CRISTIN_ID = "http://cristin.id";
 
     private final ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerServiceMock;
@@ -49,6 +57,9 @@ public class GetCustomerByOrgNumberHandlerTest {
         customerServiceMock = mock(CustomerService.class);
         Environment environmentMock = mock(Environment.class);
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
+        when(environmentMock.readEnv(API_SCHEME)).thenReturn(HTTPS);
+        when(environmentMock.readEnv(API_HOST)).thenReturn(HOST);
+        when(environmentMock.readEnv(API_BASE_PATH)).thenReturn(BASE_PATH);
         handler = new GetCustomerByOrgNumberHandler(customerServiceMock, environmentMock);
         outputStream = new ByteArrayOutputStream();
         context = Mockito.mock(Context.class);
@@ -61,6 +72,7 @@ public class GetCustomerByOrgNumberHandlerTest {
         Customer customer = new Customer.Builder()
             .withIdentifier(identifier)
             .withFeideOrganizationId(SAMPLE_ORG_NUMBER)
+            .withCristinId(SAMPLE_CRISTIN_ID)
             .build();
         when(customerServiceMock.getCustomerByOrgNumber(SAMPLE_ORG_NUMBER)).thenReturn(customer);
 
@@ -71,12 +83,14 @@ public class GetCustomerByOrgNumberHandlerTest {
             .build();
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<CustomerIdentifier> actual = objectMapper.readValue(
+        GatewayResponse<CustomerIdentifiers> actual = objectMapper.readValue(
             outputStream.toByteArray(),
             GatewayResponse.class);
 
-        GatewayResponse<CustomerIdentifier> expected = new GatewayResponse<>(
-            objectMapper.writeValueAsString(new CustomerIdentifier(identifier)),
+        GatewayResponse<CustomerIdentifiers> expected = new GatewayResponse<>(
+            objectMapper.writeValueAsString(
+                new CustomerIdentifiers(handler.toUri(identifier),
+                    URI.create(SAMPLE_CRISTIN_ID))),
             getResponseHeaders(),
             HttpStatus.SC_OK
         );

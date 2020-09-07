@@ -64,7 +64,7 @@ public class GetCustomerHandlerTest {
         Customer customer = new Customer.Builder()
                 .withIdentifier(identifier)
                 .build();
-        when(customerServiceMock.getCustomerByOrgNumber(identifier)).thenReturn(customer);
+        when(customerServiceMock.getCustomer(identifier)).thenReturn(customer);
 
         Map<String, String> pathParameters = Map.of(IDENTIFIER, identifier.toString());
         InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)

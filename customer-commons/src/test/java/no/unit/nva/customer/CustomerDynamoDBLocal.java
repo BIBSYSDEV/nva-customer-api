@@ -1,5 +1,11 @@
 package no.unit.nva.customer;
 
+import static com.amazonaws.services.dynamodbv2.model.BillingMode.PAY_PER_REQUEST;
+import static com.amazonaws.services.dynamodbv2.model.ScalarAttributeType.S;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static no.unit.nva.customer.model.Customer.CRISTIN_ID;
+
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Index;
@@ -7,28 +13,21 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.local.embedded.DynamoDBEmbedded;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
-import com.amazonaws.services.dynamodbv2.model.CreateTableResult;
 import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.Projection;
 import com.amazonaws.services.dynamodbv2.model.ProjectionType;
-import java.util.Collections;
+import java.util.List;
 import no.unit.nva.customer.model.Customer;
 import org.junit.rules.ExternalResource;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static com.amazonaws.services.dynamodbv2.model.BillingMode.PAY_PER_REQUEST;
-import static com.amazonaws.services.dynamodbv2.model.ScalarAttributeType.S;
-import static java.util.Collections.singletonList;
 
 public class CustomerDynamoDBLocal extends ExternalResource {
 
     public static final String NVA_CUSTOMERS_TABLE_NAME = "nva_customers";
     public static final String IDENTIFIER = Customer.IDENTIFIER;
     public  static final String BY_ORG_NUMBER_INDEX_NAME = "byOrgNumber";
+    public  static final String BY_CRISTIN_ID_INDEX_NAME = "byCristinId";
     public static final String ORG_NUMBER = Customer.ORG_NUMBER;
 
     private AmazonDynamoDB ddb;
@@ -46,14 +45,15 @@ public class CustomerDynamoDBLocal extends ExternalResource {
         return client.getTable(NVA_CUSTOMERS_TABLE_NAME);
     }
 
-    public Index getByOrgNumberIndex() {
-        return client.getTable(NVA_CUSTOMERS_TABLE_NAME).getIndex(BY_ORG_NUMBER_INDEX_NAME);
+    public Index getIndex(String indexName) {
+        return client.getTable(NVA_CUSTOMERS_TABLE_NAME).getIndex(indexName);
     }
 
     private void createCustomerTable(AmazonDynamoDB ddb) {
-        List<AttributeDefinition> attributeDefinitions = Arrays.asList(
+        List<AttributeDefinition> attributeDefinitions = asList(
                 new AttributeDefinition(IDENTIFIER, S),
-                new AttributeDefinition(ORG_NUMBER, S)
+                new AttributeDefinition(ORG_NUMBER, S),
+                new AttributeDefinition(CRISTIN_ID, S)
         );
 
         List<KeySchemaElement> keySchema = singletonList(
@@ -64,14 +64,22 @@ public class CustomerDynamoDBLocal extends ExternalResource {
             new KeySchemaElement(ORG_NUMBER, KeyType.HASH)
         );
 
-        Projection byOrgNumberProjection = new Projection()
+        List<KeySchemaElement> byCristinIdKeyScheme = singletonList(
+            new KeySchemaElement(CRISTIN_ID, KeyType.HASH)
+        );
+
+        Projection allProjection = new Projection()
             .withProjectionType(ProjectionType.ALL);
 
-        List<GlobalSecondaryIndex> globalSecondaryIndexes = singletonList(
+        List<GlobalSecondaryIndex> globalSecondaryIndexes = asList(
             new GlobalSecondaryIndex()
                 .withIndexName(BY_ORG_NUMBER_INDEX_NAME)
                 .withKeySchema(byOrgNumberKeyScheme)
-                .withProjection(byOrgNumberProjection)
+                .withProjection(allProjection),
+            new GlobalSecondaryIndex()
+                .withIndexName(BY_CRISTIN_ID_INDEX_NAME)
+                .withKeySchema(byCristinIdKeyScheme)
+                .withProjection(allProjection)
         );
 
         CreateTableRequest createTableRequest =
