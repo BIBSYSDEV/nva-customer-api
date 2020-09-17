@@ -1,13 +1,17 @@
 # NVA Customer API
 API for administration of Institutions that are Customers in NVA.
 
-## Deploy considerations
+## Deployment considerations
 
 Read this before deploying this template.
 
+### Parameter overrides
+
+Ensure all parameters defined in the Parameter section of [SAM template](template.yaml#L26) are set.
+
 ### Resources outside SAM template
 
-These resources are defined outside the SAM template but used in the template.
+These resources are defined outside the SAM template, but used in the template. See details below.
 
 #### Customers DynamoDB Table
 
