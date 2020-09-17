@@ -395,6 +395,9 @@ Resources:
       Handler: no.unit.nva.customer.get.GetCustomerByOrgNumberHandler::handleRequest
       Runtime: java11
       MemorySize: 1408
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 3
+      AutoPublishAlias: live
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
