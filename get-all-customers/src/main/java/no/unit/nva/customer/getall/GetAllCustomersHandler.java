@@ -63,14 +63,7 @@ public class GetAllCustomersHandler extends ApiGatewayHandler<Void, CustomerList
     protected CustomerList processInput(Void input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
         List<CustomerDb> customerDbs = customerService.getCustomers();
-        List<CustomerDto> customerDtos = toCustomerDtos(customerDbs);
-        return CustomerList.of(customerDtos);
-    }
-
-    private List<CustomerDto> toCustomerDtos(List<CustomerDb> customerDbs) {
-        return customerDbs.stream()
-            .map(customerMapper::toCustomerDtoWithoutContext)
-            .collect(Collectors.toList());
+        return customerMapper.toCustomerList(customerDbs);
     }
 
     @Override
