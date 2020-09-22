@@ -49,6 +49,7 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void, CustomerDto> {
             environment);
     }
 
+    @JacocoGenerated
     private static CustomerMapper defaultCustomerMapper(Environment environment) {
         String namespace = environment.readEnv(ID_NAMESPACE_ENV);
         return new CustomerMapper(namespace);

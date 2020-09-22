@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.UUID;
 import no.unit.nva.customer.exception.NotFoundException;
 import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.exceptions.ApiGatewayException;
@@ -29,8 +31,10 @@ import org.zalando.problem.Problem;
 public class GetCustomerByCristinIdHandlerTest {
 
     public static final String SAMPLE_CRISTIN_ID = "http://cristin.id";
+    public static final String SAMPLE_NAMESPACE = "http://example.org/customer";
     public static final String WILDCARD = "*";
     private GetCustomerByCristinIdHandler handler;
+    private CustomerMapper customerMapper;
     private CustomerService customerService;
     private Environment environment;
     private ByteArrayOutputStream outputStream;
@@ -42,9 +46,10 @@ public class GetCustomerByCristinIdHandlerTest {
     @BeforeEach
     public void init() {
         customerService = mock(CustomerService.class);
+        customerMapper = new CustomerMapper(SAMPLE_NAMESPACE);
         environment = mock(Environment.class);
         when(environment.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
-        handler = new GetCustomerByCristinIdHandler(customerService, environment);
+        handler = new GetCustomerByCristinIdHandler(customerService, customerMapper, environment);
         outputStream = new ByteArrayOutputStream();
         context = Mockito.mock(Context.class);
     }
@@ -61,9 +66,9 @@ public class GetCustomerByCristinIdHandlerTest {
 
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<CustomerDb> response = GatewayResponse.fromOutputStream(outputStream);
+        GatewayResponse<CustomerDto> response = GatewayResponse.fromOutputStream(outputStream);
 
-        assertNotNull(response.getBodyObject(CustomerDb.class));
+        assertNotNull(response.getBodyObject(CustomerDto.class));
         assertEquals(HttpStatus.SC_OK, response.getStatusCode());
     }
 
