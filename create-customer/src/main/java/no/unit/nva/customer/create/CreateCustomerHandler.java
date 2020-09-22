@@ -58,9 +58,9 @@ public class CreateCustomerHandler extends ApiGatewayHandler<CustomerDto, Custom
     @Override
     protected CustomerDto processInput(CustomerDto input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        CustomerDb customerDb = customerMapper.fromCustomerDto(input);
+        CustomerDb customerDb = customerMapper.toCustomerDb(input);
         CustomerDb createdCustomerDb = customerService.createCustomer(customerDb);
-        return customerMapper.fromCustomerDb(createdCustomerDb);
+        return customerMapper.toCustomerDto(createdCustomerDb);
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
 import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -19,12 +21,14 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.http.HttpStatus.SC_OK;
 
-public class GetCustomerHandler extends ApiGatewayHandler<Void, CustomerDb> {
+public class GetCustomerHandler extends ApiGatewayHandler<Void, CustomerDto> {
 
+    public static final String ID_NAMESPACE_ENV = "ID_NAMESPACE";
     public static final String IDENTIFIER = "identifier";
     public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
 
     private final CustomerService customerService;
+    private final CustomerMapper customerMapper;
     private static final Logger logger = LoggerFactory.getLogger(GetCustomerHandler.class);
 
     /**
@@ -36,7 +40,14 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void, CustomerDb> {
                 AmazonDynamoDBClientBuilder.defaultClient(),
                 ObjectMapperConfig.objectMapper,
                 new Environment()
-        ), new Environment());
+            ),
+            defaultCustomerMapper(new Environment()),
+            new Environment());
+    }
+
+    private static CustomerMapper defaultCustomerMapper(Environment environment) {
+        String namespace = environment.readEnv(ID_NAMESPACE_ENV);
+        return new CustomerMapper(namespace);
     }
 
     /**
@@ -45,15 +56,17 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void, CustomerDb> {
      * @param customerService customerService
      * @param environment   environment
      */
-    public GetCustomerHandler(CustomerService customerService, Environment environment) {
+    public GetCustomerHandler(CustomerService customerService, CustomerMapper customerMapper, Environment environment) {
         super(Void.class, environment, logger);
         this.customerService = customerService;
+        this.customerMapper = customerMapper;
     }
 
     @Override
-    protected CustomerDb processInput(Void input, RequestInfo requestInfo, Context context)
+    protected CustomerDto processInput(Void input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        return customerService.getCustomer(getIdentifier(requestInfo));
+        CustomerDb customerDb = customerService.getCustomer(getIdentifier(requestInfo));
+        return customerMapper.toCustomerDto(customerDb);
     }
 
     protected UUID getIdentifier(RequestInfo requestInfo) throws ApiGatewayException {
@@ -67,7 +80,7 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void, CustomerDb> {
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Void input, CustomerDb output) {
+    protected Integer getSuccessStatusCode(Void input, CustomerDto output) {
         return SC_OK;
     }
 }

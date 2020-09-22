@@ -72,7 +72,7 @@ public class CreateCustomerHandlerTest {
                 GatewayResponse.class);
 
         GatewayResponse<CustomerDto> expected = new GatewayResponse<>(
-                customerMapper.fromCustomerDb(customerDb),
+                customerMapper.toCustomerDto(customerDb),
                 getResponseHeaders(),
                 HttpStatus.SC_CREATED
         );

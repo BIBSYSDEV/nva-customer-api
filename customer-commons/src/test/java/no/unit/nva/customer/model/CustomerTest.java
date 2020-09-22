@@ -30,11 +30,11 @@ public class CustomerTest {
     @Test
     public void customerMapperCanMapBetweenCustomerDtoAndCustomerDb() {
         CustomerDb customerDb = createCustomerDb();
-        CustomerDto customerDto = customerMapper.fromCustomerDb(customerDb);
+        CustomerDto customerDto = customerMapper.toCustomerDto(customerDb);
         assertNotNull(customerDto);
         assertNotNull(customerDto.getId());
 
-        CustomerDb mappedCustomerDB = customerMapper.fromCustomerDto(customerDto);
+        CustomerDb mappedCustomerDB = customerMapper.toCustomerDb(customerDto);
         assertNotNull(mappedCustomerDB);
     }
 

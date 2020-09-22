@@ -15,7 +15,7 @@ public class CustomerMapper {
         objectMapper = JsonUtils.objectMapper;
     }
 
-    public CustomerDto fromCustomerDb(CustomerDb customer) {
+    public CustomerDto toCustomerDto(CustomerDb customer) {
         CustomerDto customerDto = objectMapper.convertValue(customer, CustomerDto.class);
         customerDto.setId(toId(customer.getIdentifier()));
         customerDto.setContext(objectMapper.createObjectNode());
@@ -26,7 +26,7 @@ public class CustomerMapper {
         return URI.create(namespace + "/" + identifier);
     }
 
-    public CustomerDb fromCustomerDto(CustomerDto customerDto) {
+    public CustomerDb toCustomerDb(CustomerDto customerDto) {
         CustomerDb customer = objectMapper.convertValue(customerDto, CustomerDb.class);
         return customer;
     }

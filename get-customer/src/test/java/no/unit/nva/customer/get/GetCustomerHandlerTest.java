@@ -4,6 +4,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.handlers.GatewayResponse;
@@ -34,8 +36,11 @@ import static org.zalando.problem.Status.BAD_REQUEST;
 public class GetCustomerHandlerTest {
 
     public static final String WILDCARD = "*";
+    public static final String SAMPLE_NAMESPACE = "http://example.org/customer";
     public static final String REQUEST_ID = "requestId";
+    public static final String MALFORMED_IDENTIFIER = "for-testing";
 
+    private CustomerMapper customerMapper;
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
     private CustomerService customerServiceMock;
     private Environment environmentMock;
@@ -51,8 +56,9 @@ public class GetCustomerHandlerTest {
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
         environmentMock = mock(Environment.class);
+        customerMapper = new CustomerMapper(SAMPLE_NAMESPACE);
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
-        handler = new GetCustomerHandler(customerServiceMock, environmentMock);
+        handler = new GetCustomerHandler(customerServiceMock, customerMapper, environmentMock);
         outputStream = new ByteArrayOutputStream();
         context = Mockito.mock(Context.class);
     }
@@ -61,25 +67,27 @@ public class GetCustomerHandlerTest {
     @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomer() throws Exception {
         UUID identifier = UUID.randomUUID();
-        CustomerDb customer = new CustomerDb.Builder()
+        CustomerDb customerDb = new CustomerDb.Builder()
                 .withIdentifier(identifier)
                 .build();
-        when(customerServiceMock.getCustomer(identifier)).thenReturn(customer);
+        when(customerServiceMock.getCustomer(identifier)).thenReturn(customerDb);
+
+        CustomerDto customerDto = customerMapper.toCustomerDto(customerDb);
 
         Map<String, String> pathParameters = Map.of(IDENTIFIER, identifier.toString());
-        InputStream inputStream = new HandlerRequestBuilder<CustomerDb>(objectMapper)
-            .withBody(customer)
+        InputStream inputStream = new HandlerRequestBuilder<CustomerDto>(objectMapper)
+            .withBody(customerDto)
             .withHeaders(getRequestHeaders())
             .withPathParameters(pathParameters)
             .build();
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<CustomerDb> actual = objectMapper.readValue(
+        GatewayResponse<CustomerDto> actual = objectMapper.readValue(
                 outputStream.toByteArray(),
                 GatewayResponse.class);
 
-        GatewayResponse<CustomerDb> expected = new GatewayResponse<>(
-            objectMapper.writeValueAsString(customer),
+        GatewayResponse<CustomerDto> expected = new GatewayResponse<>(
+            objectMapper.writeValueAsString(customerDto),
             getResponseHeaders(),
             HttpStatus.SC_OK
         );
@@ -90,9 +98,7 @@ public class GetCustomerHandlerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void requestToHandlerWithMalformedIdentifierReturnsBadRequest() throws Exception {
-        String malformedIdentifier = "for-testing";
-
-        Map<String, String> pathParameters = Map.of(IDENTIFIER, malformedIdentifier);
+        Map<String, String> pathParameters = Map.of(IDENTIFIER, MALFORMED_IDENTIFIER);
         InputStream inputStream = new HandlerRequestBuilder<CustomerDb>(objectMapper)
             .withHeaders(getRequestHeaders())
             .withPathParameters(pathParameters)
@@ -108,7 +114,7 @@ public class GetCustomerHandlerTest {
                 Problem.builder()
                 .withStatus(BAD_REQUEST)
                 .withTitle(BAD_REQUEST.getReasonPhrase())
-                .withDetail(IDENTIFIER_IS_NOT_A_VALID_UUID + malformedIdentifier)
+                .withDetail(IDENTIFIER_IS_NOT_A_VALID_UUID + MALFORMED_IDENTIFIER)
                 .with(REQUEST_ID, null)
                 .build(),
                 getErrorResponseHeaders(),
