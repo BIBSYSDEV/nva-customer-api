@@ -12,6 +12,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.UUID;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.CustomerDb;
@@ -63,7 +64,7 @@ public class GetAllCustomersHandlerTest {
                 .withIdentifier(identifier)
                 .build();
         CustomerDto customerDto = customerMapper.toCustomerDtoWithoutContext(customerDb);
-        CustomerList customers = CustomerList.of(customerDto);
+        CustomerList customers = customerMapper.toCustomerList(singletonList(customerDb));
         when(customerServiceMock.getCustomers()).thenReturn(singletonList(customerDb));
 
         InputStream inputStream = new HandlerRequestBuilder<Void>(objectMapper)

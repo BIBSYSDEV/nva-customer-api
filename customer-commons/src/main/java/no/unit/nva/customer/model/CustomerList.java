@@ -2,7 +2,6 @@ package no.unit.nva.customer.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
 @SuppressWarnings("PMD.ShortMethodName")
@@ -20,15 +19,16 @@ public class CustomerList {
     /**
      * Create a CustomerList from a List of CustomerDto objects.
      *
+     * @param context   context object
      * @param customers list of CustomerDto
      * @return customerList
      */
-    public static CustomerList of(List<CustomerDto> customers) {
-        return new CustomerList(customers, new ObjectMapper().createObjectNode());
+    public static CustomerList of(JsonNode context, List<CustomerDto> customers) {
+        return new CustomerList(customers, context);
     }
 
-    public static CustomerList of(CustomerDto... customers) {
-        return of(List.of(customers));
+    public static CustomerList of(JsonNode context, CustomerDto... customers) {
+        return of(context, List.of(customers));
     }
 
     public List<CustomerDto> getCustomers() {
