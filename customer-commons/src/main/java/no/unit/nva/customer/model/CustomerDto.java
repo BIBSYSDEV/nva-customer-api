@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.UUID;
 import no.unit.nva.customer.model.interfaces.Customer;
 import no.unit.nva.customer.model.interfaces.JsonLdSupport;
 import nva.commons.utils.JacocoGenerated;
@@ -14,7 +13,6 @@ import nva.commons.utils.JacocoGenerated;
 public class CustomerDto implements Customer, JsonLdSupport {
 
     private URI id;
-    private UUID identifier;
     private Instant createdDate;
     private Instant modifiedDate;
     private String name;
@@ -29,27 +27,16 @@ public class CustomerDto implements Customer, JsonLdSupport {
     private URI context;
 
     public CustomerDto() {
-
     }
 
     @Override
     public URI getId() {
-        return id;
+        return this.id;
     }
 
     @Override
     public void setId(URI id) {
         this.id = id;
-    }
-
-    @Override
-    public UUID getIdentifier() {
-        return identifier;
-    }
-
-    @Override
-    public void setIdentifier(UUID identifier) {
-        this.identifier = identifier;
     }
 
     @Override
@@ -194,5 +181,4 @@ public class CustomerDto implements Customer, JsonLdSupport {
             getShortName(), getArchiveName(), getCname(), getInstitutionDns(), getFeideOrganizationId(),
             getCristinId(), getContext());
     }
-
 }

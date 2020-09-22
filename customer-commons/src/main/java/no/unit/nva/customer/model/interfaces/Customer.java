@@ -1,13 +1,8 @@
 package no.unit.nva.customer.model.interfaces;
 
 import java.time.Instant;
-import java.util.UUID;
 
-public interface Customer {
-
-    UUID getIdentifier();
-
-    void setIdentifier(UUID identifier);
+public interface Customer extends WithIdentifier {
 
     Instant getCreatedDate();
 
@@ -48,5 +43,4 @@ public interface Customer {
     String getCristinId();
 
     void setCristinId(String cristinId);
-
 }

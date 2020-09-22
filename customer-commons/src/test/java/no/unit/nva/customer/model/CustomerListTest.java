@@ -2,6 +2,10 @@ package no.unit.nva.customer.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Optional;
+import java.util.stream.Stream;
 import nva.commons.utils.JsonUtils;
 import org.junit.jupiter.api.Test;
 
