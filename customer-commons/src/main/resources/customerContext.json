@@ -3,9 +3,6 @@
   "xsd": "http://www.w3.org/2001/XMLSchema#",
   "type": "@type",
   "id": "@id",
-  "handle": {
-    "@type": "@id"
-  },
   "createdDate": {
     "@type": "xsd:dateTime"
   },
