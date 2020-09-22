@@ -4,6 +4,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -15,9 +17,11 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CreateCustomerHandler extends ApiGatewayHandler<CustomerDb, CustomerDb> {
+public class CreateCustomerHandler extends ApiGatewayHandler<CustomerDto, CustomerDto> {
 
+    public static final String ID_NAMESPACE_ENV = "ID_NAMESPACE";
     private final CustomerService customerService;
+    private final CustomerMapper customerMapper;
     private static final Logger logger = LoggerFactory.getLogger(CreateCustomerHandler.class);
 
     /**
@@ -29,7 +33,14 @@ public class CreateCustomerHandler extends ApiGatewayHandler<CustomerDb, Custome
                 AmazonDynamoDBClientBuilder.defaultClient(),
                 ObjectMapperConfig.objectMapper,
                 new Environment()
-        ), new Environment());
+            ),
+            defaultCustomerMapper(new Environment()),
+            new Environment());
+    }
+
+    private static CustomerMapper defaultCustomerMapper(Environment environment) {
+        String namespace = environment.readEnv(ID_NAMESPACE_ENV);
+        return new CustomerMapper(namespace);
     }
 
     /**
@@ -38,19 +49,22 @@ public class CreateCustomerHandler extends ApiGatewayHandler<CustomerDb, Custome
      * @param customerService customerService
      * @param environment   environment
      */
-    public CreateCustomerHandler(CustomerService customerService, Environment environment) {
-        super(CustomerDb.class, environment, logger);
+    public CreateCustomerHandler(CustomerService customerService, CustomerMapper customerMapper, Environment environment) {
+        super(CustomerDto.class, environment, logger);
         this.customerService = customerService;
+        this.customerMapper = customerMapper;
     }
 
     @Override
-    protected CustomerDb processInput(CustomerDb input, RequestInfo requestInfo, Context context)
+    protected CustomerDto processInput(CustomerDto input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        return customerService.createCustomer(input);
+        CustomerDb customerDb = customerMapper.fromCustomerDto(input);
+        CustomerDb createdCustomerDb = customerService.createCustomer(customerDb);
+        return customerMapper.fromCustomerDb(createdCustomerDb);
     }
 
     @Override
-    protected Integer getSuccessStatusCode(CustomerDb input, CustomerDb output) {
+    protected Integer getSuccessStatusCode(CustomerDto input, CustomerDto output) {
         return HttpStatus.SC_CREATED;
     }
 }

@@ -15,14 +15,15 @@ public class CustomerMapper {
         objectMapper = JsonUtils.objectMapper;
     }
 
-    public CustomerDto fromCustomer(CustomerDb customer) {
+    public CustomerDto fromCustomerDb(CustomerDb customer) {
         CustomerDto customerDto = objectMapper.convertValue(customer, CustomerDto.class);
         customerDto.setId(toId(customer.getIdentifier()));
+        customerDto.setContext(objectMapper.createObjectNode());
         return customerDto;
     }
 
     private URI toId(UUID identifier) {
-        return URI.create(namespace + identifier);
+        return URI.create(namespace + "/" + identifier);
     }
 
     public CustomerDb fromCustomerDto(CustomerDto customerDto) {

@@ -123,8 +123,11 @@ public class DynamoDBCustomerService implements CustomerService {
     @Override
     public CustomerDb createCustomer(CustomerDb customer) throws ApiGatewayException {
         UUID identifier = UUID.randomUUID();
+        Instant now = Instant.now();
         try {
             customer.setIdentifier(identifier);
+            customer.setCreatedDate(now);
+            customer.setModifiedDate(now);
             table.putItem(customerToItem(customer));
         } catch (Exception e) {
             throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE, e);

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 public class CustomerTest {
 
     private final ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
-    private CustomerMapper customerMapper = new CustomerMapper("http://example.org/customer/");
+    private CustomerMapper customerMapper = new CustomerMapper("http://example.org/customer");
 
     @Test
     public void customerMappedToJsonAndBack() throws JsonProcessingException {
@@ -30,7 +30,7 @@ public class CustomerTest {
     @Test
     public void customerMapperCanMapBetweenCustomerDtoAndCustomerDb() {
         CustomerDb customerDb = createCustomerDb();
-        CustomerDto customerDto = customerMapper.fromCustomer(customerDb);
+        CustomerDto customerDto = customerMapper.fromCustomerDb(customerDb);
         assertNotNull(customerDto);
         assertNotNull(customerDto.getId());
 
