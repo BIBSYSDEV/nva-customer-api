@@ -29,21 +29,23 @@ public class CreateCustomerHandler extends ApiGatewayHandler<CustomerDto, Custom
      */
     @JacocoGenerated
     public CreateCustomerHandler() {
-        this(defaultDynamoDBCustomerService(new Environment()),
-            defaultCustomerMapper(new Environment()),
+        this(defaultCustomerService(),
+            defaultCustomerMapper(),
+            new Environment())
+        ;
+    }
+
+    @JacocoGenerated
+    private static DynamoDBCustomerService defaultCustomerService() {
+        return new DynamoDBCustomerService(
+            AmazonDynamoDBClientBuilder.defaultClient(),
+            ObjectMapperConfig.objectMapper,
             new Environment());
     }
 
     @JacocoGenerated
-    private static DynamoDBCustomerService defaultDynamoDBCustomerService(Environment environment) {
-        return new DynamoDBCustomerService(
-            AmazonDynamoDBClientBuilder.defaultClient(),
-            ObjectMapperConfig.objectMapper,
-            environment);
-    }
-
-    private static CustomerMapper defaultCustomerMapper(Environment environment) {
-        String namespace = environment.readEnv(ID_NAMESPACE_ENV);
+    private static CustomerMapper defaultCustomerMapper() {
+        String namespace = new Environment().readEnv(ID_NAMESPACE_ENV);
         return new CustomerMapper(namespace);
     }
 
@@ -53,7 +55,10 @@ public class CreateCustomerHandler extends ApiGatewayHandler<CustomerDto, Custom
      * @param customerService customerService
      * @param environment   environment
      */
-    public CreateCustomerHandler(CustomerService customerService, CustomerMapper customerMapper, Environment environment) {
+    public CreateCustomerHandler(
+        CustomerService customerService,
+        CustomerMapper customerMapper,
+        Environment environment) {
         super(CustomerDto.class, environment, logger);
         this.customerService = customerService;
         this.customerMapper = customerMapper;

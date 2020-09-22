@@ -36,22 +36,23 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void, CustomerDto> {
      */
     @JacocoGenerated
     public GetCustomerHandler() {
-        this(defaultDynamoDBCustomerService(new Environment()),
-            defaultCustomerMapper(new Environment()),
+        this(defaultCustomerService(),
+            defaultCustomerMapper(),
+            new Environment()
+        );
+    }
+
+    @JacocoGenerated
+    private static DynamoDBCustomerService defaultCustomerService() {
+        return new DynamoDBCustomerService(
+            AmazonDynamoDBClientBuilder.defaultClient(),
+            ObjectMapperConfig.objectMapper,
             new Environment());
     }
 
     @JacocoGenerated
-    private static DynamoDBCustomerService defaultDynamoDBCustomerService(Environment environment) {
-        return new DynamoDBCustomerService(
-            AmazonDynamoDBClientBuilder.defaultClient(),
-            ObjectMapperConfig.objectMapper,
-            environment);
-    }
-
-    @JacocoGenerated
-    private static CustomerMapper defaultCustomerMapper(Environment environment) {
-        String namespace = environment.readEnv(ID_NAMESPACE_ENV);
+    private static CustomerMapper defaultCustomerMapper() {
+        String namespace = new Environment().readEnv(ID_NAMESPACE_ENV);
         return new CustomerMapper(namespace);
     }
 

@@ -33,11 +33,14 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
      */
     @JacocoGenerated
     public GetCustomerByCristinIdHandler() {
-        this(defaultDynamoDBCustomerService(), defaultCustomerMapper(), new Environment());
+        this(defaultCustomerService(),
+            defaultCustomerMapper(),
+            new Environment()
+        );
     }
 
     @JacocoGenerated
-    private static DynamoDBCustomerService defaultDynamoDBCustomerService() {
+    private static DynamoDBCustomerService defaultCustomerService() {
         return new DynamoDBCustomerService(
             AmazonDynamoDBClientBuilder.defaultClient(),
             ObjectMapperConfig.objectMapper,
@@ -56,7 +59,10 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
      * @param customerService customerService
      * @param environment   environment
      */
-    public GetCustomerByCristinIdHandler(CustomerService customerService, CustomerMapper customerMapper, Environment environment) {
+    public GetCustomerByCristinIdHandler(
+        CustomerService customerService,
+        CustomerMapper customerMapper,
+        Environment environment) {
         super(Void.class, environment, logger);
         this.customerService = customerService;
         this.customerMapper = customerMapper;

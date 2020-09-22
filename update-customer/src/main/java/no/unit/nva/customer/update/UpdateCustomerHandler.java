@@ -30,28 +30,29 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<CustomerDto, Custom
     private final CustomerService customerService;
     private static final Logger logger = LoggerFactory.getLogger(UpdateCustomerHandler.class);
 
-
+    /**
+     * Default Constructor for UpdateCustomerHandler.
+     */
     @JacocoGenerated
     public UpdateCustomerHandler() {
-        this(new Environment());
+        this(defaultCustomerService(),
+            defaultCustomerMapper(),
+            new Environment()
+        );
     }
 
     @JacocoGenerated
-    public UpdateCustomerHandler(Environment environment) {
-        this(defaultDynamoDBCustomerService(environment), defaultCustomerMapper(environment), environment);
-    }
-
-    private static CustomerMapper defaultCustomerMapper(Environment environment) {
-        String namespace = environment.readEnv(ID_NAMESPACE_ENV);
-        return new CustomerMapper(namespace);
-    }
-
-    @JacocoGenerated
-    private static DynamoDBCustomerService defaultDynamoDBCustomerService(Environment environment) {
+    private static DynamoDBCustomerService defaultCustomerService() {
         return new DynamoDBCustomerService(
             AmazonDynamoDBClientBuilder.defaultClient(),
             ObjectMapperConfig.objectMapper,
-            environment);
+            new Environment());
+    }
+
+    @JacocoGenerated
+    private static CustomerMapper defaultCustomerMapper() {
+        String namespace = new Environment().readEnv(ID_NAMESPACE_ENV);
+        return new CustomerMapper(namespace);
     }
 
     /**
@@ -60,7 +61,10 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<CustomerDto, Custom
      * @param customerService customerService
      * @param environment   environment
      */
-    public UpdateCustomerHandler(CustomerService customerService, CustomerMapper customerMapper, Environment environment) {
+    public UpdateCustomerHandler(
+        CustomerService customerService,
+        CustomerMapper customerMapper,
+        Environment environment) {
         super(CustomerDto.class, environment, logger);
         this.customerService = customerService;
         this.customerMapper = customerMapper;

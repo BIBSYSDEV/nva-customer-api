@@ -1,8 +1,5 @@
 package no.unit.nva.customer.get;
 
-import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_BASE_PATH;
-import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_HOST;
-import static no.unit.nva.customer.get.GetCustomerByOrgNumberHandler.API_SCHEME;
 import static no.unit.nva.customer.testing.TestHeaders.getErrorResponseHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getRequestHeaders;
 import static no.unit.nva.customer.testing.TestHeaders.getResponseHeaders;
@@ -22,6 +19,8 @@ import java.util.Map;
 import java.util.UUID;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.handlers.GatewayResponse;
@@ -35,15 +34,14 @@ import org.zalando.problem.Problem;
 public class GetCustomerByOrgNumberHandlerTest {
 
     public static final String WILDCARD = "*";
+    public static final String SAMPLE_NAMESPACE = "http://example.org/customer";
     public static final String REQUEST_ID = "requestId";
     public static final String SAMPLE_ORG_NUMBER = "123";
     public static final String EXPECTED_ERROR_MESSAGE = "Missing from pathParameters: orgNumber";
-    public static final String HTTPS = "https";
-    public static final String HOST = "nva.no";
-    public static final String BASE_PATH = "customer";
     public static final String SAMPLE_CRISTIN_ID = "http://cristin.id";
 
     private final ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
+    private CustomerMapper customerMapper;
     private CustomerService customerServiceMock;
     private GetCustomerByOrgNumberHandler handler;
     private ByteArrayOutputStream outputStream;
@@ -55,12 +53,10 @@ public class GetCustomerByOrgNumberHandlerTest {
     @BeforeEach
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
+        customerMapper = new CustomerMapper(SAMPLE_NAMESPACE);
         Environment environmentMock = mock(Environment.class);
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
-        when(environmentMock.readEnv(API_SCHEME)).thenReturn(HTTPS);
-        when(environmentMock.readEnv(API_HOST)).thenReturn(HOST);
-        when(environmentMock.readEnv(API_BASE_PATH)).thenReturn(BASE_PATH);
-        handler = new GetCustomerByOrgNumberHandler(customerServiceMock, environmentMock);
+        handler = new GetCustomerByOrgNumberHandler(customerServiceMock, customerMapper, environmentMock);
         outputStream = new ByteArrayOutputStream();
         context = Mockito.mock(Context.class);
     }
@@ -69,12 +65,14 @@ public class GetCustomerByOrgNumberHandlerTest {
     @SuppressWarnings("unchecked")
     public void getCustomerByOrgNumberReturnsCustomerWhenInputIsExistingCustomerOrgNumber() throws Exception {
         UUID identifier = UUID.randomUUID();
-        CustomerDb customer = new CustomerDb.Builder()
+        CustomerDb customerDb = new CustomerDb.Builder()
             .withIdentifier(identifier)
             .withFeideOrganizationId(SAMPLE_ORG_NUMBER)
             .withCristinId(SAMPLE_CRISTIN_ID)
             .build();
-        when(customerServiceMock.getCustomerByOrgNumber(SAMPLE_ORG_NUMBER)).thenReturn(customer);
+        when(customerServiceMock.getCustomerByOrgNumber(SAMPLE_ORG_NUMBER)).thenReturn(customerDb);
+
+        CustomerDto customerDto = customerMapper.toCustomerDto(customerDb);
 
         Map<String, String> pathParameters = Map.of(GetCustomerByOrgNumberHandler.ORG_NUMBER, SAMPLE_ORG_NUMBER);
         InputStream inputStream = new HandlerRequestBuilder<Void>(objectMapper)
@@ -89,7 +87,7 @@ public class GetCustomerByOrgNumberHandlerTest {
 
         GatewayResponse<CustomerIdentifiers> expected = new GatewayResponse<>(
             objectMapper.writeValueAsString(
-                new CustomerIdentifiers(handler.toUri(identifier),
+                new CustomerIdentifiers(customerDto.getId(),
                     URI.create(SAMPLE_CRISTIN_ID))),
             getResponseHeaders(),
             HttpStatus.SC_OK

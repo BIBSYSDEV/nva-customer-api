@@ -3,7 +3,6 @@ package no.unit.nva.customer.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("PMD.ShortMethodName")
