@@ -4,10 +4,12 @@ import static no.unit.nva.hamcrest.DoesNotHaveNullOrEmptyFields.doesNotHaveNullO
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.UUID;
 import no.unit.nva.customer.ObjectMapperConfig;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,21 @@ public class CustomerTest {
 
         CustomerDb mappedCustomerDB = customerMapper.toCustomerDb(customerDto);
         assertNotNull(mappedCustomerDB);
+    }
+
+    @Test
+    public void customerMapperCanMapListOfCustomerDtosToCustomerList() {
+        CustomerDb customerDb = createCustomerDb();
+        CustomerList customerList = customerMapper.toCustomerList(Collections.singletonList(customerDb));
+        assertNotNull(customerList);
+    }
+
+    @Test
+    public void customerMapperCanMapustomerDbToCustomerDtoWithoutContext() {
+        CustomerDb customerDb = createCustomerDb();
+        CustomerDto customerDto = customerMapper.toCustomerDtoWithoutContext(customerDb);
+        assertNotNull(customerDto);
+        assertNull(customerDto.getContext());
     }
 
     private CustomerDb createCustomerDb() {

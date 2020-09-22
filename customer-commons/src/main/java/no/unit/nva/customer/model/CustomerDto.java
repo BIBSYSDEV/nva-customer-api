@@ -33,22 +33,6 @@ public class CustomerDto implements Customer, JsonLdSupport {
 
     }
 
-    private CustomerDto(Builder builder) {
-        setId(builder.id);
-        setIdentifier(builder.identifier);
-        setCreatedDate(builder.createdDate);
-        setModifiedDate(builder.modifiedDate);
-        setName(builder.name);
-        setDisplayName(builder.displayName);
-        setShortName(builder.shortName);
-        setArchiveName(builder.archiveName);
-        setCname(builder.cname);
-        setInstitutionDns(builder.institutionDns);
-        setFeideOrganizationId(builder.feideOrganizationId);
-        setCristinId(builder.cristinId);
-        setContext(builder.context);
-    }
-
     @Override
     public URI getId() {
         return id;
@@ -210,95 +194,6 @@ public class CustomerDto implements Customer, JsonLdSupport {
         return Objects.hash(getId(), getIdentifier(), getCreatedDate(), getModifiedDate(), getName(), getDisplayName(),
             getShortName(), getArchiveName(), getCname(), getInstitutionDns(), getFeideOrganizationId(),
             getCristinId(), getContext());
-    }
-
-
-    public static final class Builder {
-        private URI id;
-        private UUID identifier;
-        private Instant createdDate;
-        private Instant modifiedDate;
-        private String name;
-        private String displayName;
-        private String shortName;
-        private String archiveName;
-        private String cname;
-        private String institutionDns;
-        private String feideOrganizationId;
-        private String cristinId;
-        private JsonNode context;
-
-        public Builder() {
-        }
-
-        public Builder withId(URI id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withIdentifier(UUID identifier) {
-            this.identifier = identifier;
-            return this;
-        }
-
-        public Builder withCreatedDate(Instant createdDate) {
-            this.createdDate = createdDate;
-            return this;
-        }
-
-        public Builder withModifiedDate(Instant modifiedDate) {
-            this.modifiedDate = modifiedDate;
-            return this;
-        }
-
-        public Builder withName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder withDisplayName(String displayName) {
-            this.displayName = displayName;
-            return this;
-        }
-
-        public Builder withShortName(String shortName) {
-            this.shortName = shortName;
-            return this;
-        }
-
-        public CustomerDto.Builder withArchiveName(String archiveName) {
-            this.archiveName = archiveName;
-            return this;
-        }
-
-        public Builder withCname(String cname) {
-            this.cname = cname;
-            return this;
-        }
-
-        public Builder withInstitutionDns(String institutionDns) {
-            this.institutionDns = institutionDns;
-            return this;
-        }
-
-        public Builder withFeideOrganizationId(String feideOrganizationId) {
-            this.feideOrganizationId = feideOrganizationId;
-            return this;
-        }
-
-        public Builder withCristinId(String cristinId) {
-            this.cristinId = cristinId;
-            return this;
-        }
-
-        public Builder withContext(JsonNode context) {
-            this.context = context;
-            return this;
-        }
-
-        public CustomerDto build() {
-            return new CustomerDto(this);
-        }
     }
 
 }
