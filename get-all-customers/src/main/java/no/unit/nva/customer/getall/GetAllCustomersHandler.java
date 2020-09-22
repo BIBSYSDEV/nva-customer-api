@@ -69,7 +69,7 @@ public class GetAllCustomersHandler extends ApiGatewayHandler<Void, CustomerList
 
     private List<CustomerDto> toCustomerDtos(List<CustomerDb> customerDbs) {
         return customerDbs.stream()
-            .map(customerMapper::toCustomerDto)
+            .map(customerMapper::toCustomerDtoWithoutContext)
             .collect(Collectors.toList());
     }
 

@@ -62,7 +62,7 @@ public class GetAllCustomersHandlerTest {
         CustomerDb customerDb = new CustomerDb.Builder()
                 .withIdentifier(identifier)
                 .build();
-        CustomerDto customerDto = customerMapper.toCustomerDto(customerDb);
+        CustomerDto customerDto = customerMapper.toCustomerDtoWithoutContext(customerDb);
         CustomerList customers = CustomerList.of(customerDto);
         when(customerServiceMock.getCustomers()).thenReturn(singletonList(customerDb));
 

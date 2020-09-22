@@ -15,10 +15,16 @@ public class CustomerMapper {
         objectMapper = JsonUtils.objectMapper;
     }
 
-    public CustomerDto toCustomerDto(CustomerDb customer) {
-        CustomerDto customerDto = objectMapper.convertValue(customer, CustomerDto.class);
-        customerDto.setId(toId(customer.getIdentifier()));
+    public CustomerDto toCustomerDto(CustomerDb customerDb) {
+        CustomerDto customerDto = objectMapper.convertValue(customerDb, CustomerDto.class);
+        customerDto.setId(toId(customerDb.getIdentifier()));
         customerDto.setContext(objectMapper.createObjectNode());
+        return customerDto;
+    }
+
+    public  CustomerDto toCustomerDtoWithoutContext(CustomerDb customerDb) {
+        CustomerDto customerDto = toCustomerDto(customerDb);
+        customerDto.setContext(null);
         return customerDto;
     }
 
