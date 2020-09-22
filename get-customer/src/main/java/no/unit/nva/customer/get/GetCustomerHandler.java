@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.http.HttpStatus.SC_OK;
 
-public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
+public class GetCustomerHandler extends ApiGatewayHandler<Void, CustomerDb> {
 
     public static final String IDENTIFIER = "identifier";
     public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
@@ -51,7 +51,7 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
     }
 
     @Override
-    protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
+    protected CustomerDb processInput(Void input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
         return customerService.getCustomer(getIdentifier(requestInfo));
     }
@@ -67,7 +67,7 @@ public class GetCustomerHandler extends ApiGatewayHandler<Void,Customer> {
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Void input, Customer output) {
+    protected Integer getSuccessStatusCode(Void input, CustomerDb output) {
         return SC_OK;
     }
 }

@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -17,7 +17,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Customer> {
+public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, CustomerDb> {
 
     public static final String CRISTIN_ID = "cristinId";
 
@@ -53,10 +53,10 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
     }
 
     @Override
-    protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
+    protected CustomerDb processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         String cristinId = getCristinId(requestInfo);
-        Customer customer = customerService.getCustomerByCristinId(cristinId);
+        CustomerDb customer = customerService.getCustomerByCristinId(cristinId);
 
         return customer;
     }
@@ -70,7 +70,7 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Void input, Customer output) {
+    protected Integer getSuccessStatusCode(Void input, CustomerDb output) {
         return HttpStatus.SC_OK;
     }
 }

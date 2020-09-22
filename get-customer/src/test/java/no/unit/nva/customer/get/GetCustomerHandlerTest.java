@@ -3,7 +3,7 @@ package no.unit.nva.customer.get;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.handlers.GatewayResponse;
@@ -61,24 +61,24 @@ public class GetCustomerHandlerTest {
     @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomer() throws Exception {
         UUID identifier = UUID.randomUUID();
-        Customer customer = new Customer.Builder()
+        CustomerDb customer = new CustomerDb.Builder()
                 .withIdentifier(identifier)
                 .build();
         when(customerServiceMock.getCustomer(identifier)).thenReturn(customer);
 
         Map<String, String> pathParameters = Map.of(IDENTIFIER, identifier.toString());
-        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+        InputStream inputStream = new HandlerRequestBuilder<CustomerDb>(objectMapper)
             .withBody(customer)
             .withHeaders(getRequestHeaders())
             .withPathParameters(pathParameters)
             .build();
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<Customer> actual = objectMapper.readValue(
+        GatewayResponse<CustomerDb> actual = objectMapper.readValue(
                 outputStream.toByteArray(),
                 GatewayResponse.class);
 
-        GatewayResponse<Customer> expected = new GatewayResponse<>(
+        GatewayResponse<CustomerDb> expected = new GatewayResponse<>(
             objectMapper.writeValueAsString(customer),
             getResponseHeaders(),
             HttpStatus.SC_OK
@@ -93,7 +93,7 @@ public class GetCustomerHandlerTest {
         String malformedIdentifier = "for-testing";
 
         Map<String, String> pathParameters = Map.of(IDENTIFIER, malformedIdentifier);
-        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+        InputStream inputStream = new HandlerRequestBuilder<CustomerDb>(objectMapper)
             .withHeaders(getRequestHeaders())
             .withPathParameters(pathParameters)
             .build();

@@ -23,7 +23,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
 import no.unit.nva.customer.ObjectMapperConfig;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.handlers.GatewayResponse;
@@ -67,7 +67,7 @@ public class UpdateCustomerHandlerTest {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         handler.handleRequest(request, outputStream, context);
 
-        GatewayResponse<Customer> response = GatewayResponse.fromOutputStream(outputStream);
+        GatewayResponse<CustomerDb> response = GatewayResponse.fromOutputStream(outputStream);
 
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.SC_OK)));
     }
@@ -76,14 +76,14 @@ public class UpdateCustomerHandlerTest {
     @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomerUpdated() throws Exception {
         UUID identifier = UUID.randomUUID();
-        Customer customer = new Customer.Builder()
+        CustomerDb customer = new CustomerDb.Builder()
             .withIdentifier(identifier)
             .withName("New Customer")
             .build();
         when(customerServiceMock.updateCustomer(identifier, customer)).thenReturn(customer);
 
         Map<String, String> pathParameters = Map.of(IDENTIFIER, identifier.toString());
-        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+        InputStream inputStream = new HandlerRequestBuilder<CustomerDb>(objectMapper)
             .withBody(customer)
             .withHeaders(getRequestHeaders())
             .withPathParameters(pathParameters)
@@ -91,11 +91,11 @@ public class UpdateCustomerHandlerTest {
 
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<Customer> actual = objectMapper.readValue(
+        GatewayResponse<CustomerDb> actual = objectMapper.readValue(
             outputStream.toByteArray(),
             GatewayResponse.class);
 
-        GatewayResponse<Customer> expected = new GatewayResponse<>(
+        GatewayResponse<CustomerDb> expected = new GatewayResponse<>(
             customer,
             getResponseHeaders(),
             HttpStatus.SC_OK
@@ -108,13 +108,13 @@ public class UpdateCustomerHandlerTest {
     @SuppressWarnings("unchecked")
     public void requestToHandlerWithMalformedIdentifierReturnsBadRequest() throws Exception {
         String malformedIdentifier = "for-testing";
-        Customer customer = new Customer.Builder()
+        CustomerDb customer = new CustomerDb.Builder()
             .withIdentifier(UUID.randomUUID())
             .withName("New Customer")
             .build();
 
         Map<String, String> pathParameters = Map.of(IDENTIFIER, malformedIdentifier);
-        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+        InputStream inputStream = new HandlerRequestBuilder<CustomerDb>(objectMapper)
             .withBody(customer)
             .withHeaders(getRequestHeaders())
             .withPathParameters(pathParameters)

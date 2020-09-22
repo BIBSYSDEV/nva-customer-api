@@ -3,7 +3,7 @@ package no.unit.nva.customer.getall;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.model.CustomerList;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
@@ -54,7 +54,7 @@ public class GetAllCustomersHandlerTest {
     @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomerList() throws Exception {
         UUID identifier = UUID.randomUUID();
-        Customer customer = new Customer.Builder()
+        CustomerDb customer = new CustomerDb.Builder()
                 .withIdentifier(identifier)
                 .build();
         CustomerList customers = CustomerList.of(customer);

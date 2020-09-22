@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.util.UUID;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -66,7 +66,7 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
     protected CustomerIdentifiers processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         String orgNumber = getOrgNumber(requestInfo);
-        Customer customer = customerService.getCustomerByOrgNumber(orgNumber);
+        CustomerDb customer = customerService.getCustomerByOrgNumber(orgNumber);
 
         URI identifier = toUri(customer.getIdentifier());
         URI cristinId = URI.create(customer.getCristinId());

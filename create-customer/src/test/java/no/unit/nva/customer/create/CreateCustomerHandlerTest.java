@@ -3,7 +3,7 @@ package no.unit.nva.customer.create;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.handlers.GatewayResponse;
@@ -51,22 +51,22 @@ public class CreateCustomerHandlerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomerCreated() throws Exception {
-        Customer customer = new Customer.Builder()
+        CustomerDb customer = new CustomerDb.Builder()
                 .withName("New Customer")
                 .build();
         when(customerServiceMock.createCustomer(customer)).thenReturn(customer);
 
-        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
+        InputStream inputStream = new HandlerRequestBuilder<CustomerDb>(objectMapper)
             .withBody(customer)
             .withHeaders(getRequestHeaders())
             .build();
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<Customer> actual = objectMapper.readValue(
+        GatewayResponse<CustomerDb> actual = objectMapper.readValue(
                 outputStream.toByteArray(),
                 GatewayResponse.class);
 
-        GatewayResponse<Customer> expected = new GatewayResponse<>(
+        GatewayResponse<CustomerDb> expected = new GatewayResponse<>(
                 customer,
                 getResponseHeaders(),
                 HttpStatus.SC_CREATED

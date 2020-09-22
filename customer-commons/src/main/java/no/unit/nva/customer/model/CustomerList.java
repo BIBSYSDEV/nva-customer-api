@@ -4,21 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("PMD.ShortMethodName")
-public class CustomerList extends ArrayList<Customer> {
+public class CustomerList extends ArrayList<CustomerDto> {
 
     /**
-     * Create a CustomerList from a List of Customer objects.
+     * Create a CustomerList from a List of CustomerDto objects.
      *
-     * @param customers list of Customer
+     * @param customers list of CustomerDto
      * @return customerList
      */
-    public static CustomerList of(List<Customer> customers) {
+    public static CustomerList of(List<CustomerDto> customers) {
         CustomerList list = new CustomerList();
         list.addAll(customers);
         return list;
     }
 
-    public static CustomerList of(Customer... customers) {
+    public static CustomerList of(CustomerDto... customers) {
         return of(List.of(customers));
     }
 

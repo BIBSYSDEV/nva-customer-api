@@ -8,21 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 import no.unit.nva.customer.exception.NotFoundException;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.handlers.GatewayResponse;
 import nva.commons.utils.Environment;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -63,9 +61,9 @@ public class GetCustomerByCristinIdHandlerTest {
 
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<Customer> response = GatewayResponse.fromOutputStream(outputStream);
+        GatewayResponse<CustomerDb> response = GatewayResponse.fromOutputStream(outputStream);
 
-        assertNotNull(response.getBodyObject(Customer.class));
+        assertNotNull(response.getBodyObject(CustomerDb.class));
         assertEquals(HttpStatus.SC_OK, response.getStatusCode());
     }
 
@@ -95,8 +93,8 @@ public class GetCustomerByCristinIdHandlerTest {
         when(customerService.getCustomerByCristinId(SAMPLE_CRISTIN_ID)).thenReturn(createCustomer());
     }
 
-    private Customer createCustomer() {
-        Customer customer = new Customer.Builder()
+    private CustomerDb createCustomer() {
+        CustomerDb customer = new CustomerDb.Builder()
             .withIdentifier(UUID.randomUUID())
             .withCristinId(SAMPLE_CRISTIN_ID)
             .build();
