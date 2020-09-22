@@ -2,7 +2,6 @@ package no.unit.nva.customer.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
@@ -27,7 +26,7 @@ public class CustomerDto implements Customer, JsonLdSupport {
     private String feideOrganizationId;
     private String cristinId;
     @JsonProperty("@context")
-    private JsonNode context;
+    private URI context;
 
     public CustomerDto() {
 
@@ -154,12 +153,12 @@ public class CustomerDto implements Customer, JsonLdSupport {
     }
 
     @Override
-    public JsonNode getContext() {
+    public URI getContext() {
         return context;
     }
 
     @Override
-    public void setContext(JsonNode context) {
+    public void setContext(URI context) {
         this.context = context;
     }
 

@@ -1,6 +1,5 @@
 package no.unit.nva.customer.model.interfaces;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
 
 public interface JsonLdSupport {
@@ -9,7 +8,7 @@ public interface JsonLdSupport {
 
     void setId(URI id);
 
-    JsonNode getContext();
+    URI getContext();
 
-    void setContext(JsonNode context);
+    void setContext(URI context);
 }

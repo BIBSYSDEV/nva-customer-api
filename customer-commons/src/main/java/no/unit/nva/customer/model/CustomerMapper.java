@@ -1,20 +1,20 @@
 package no.unit.nva.customer.model;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import nva.commons.utils.IoUtils;
 import nva.commons.utils.JsonUtils;
 
 public class CustomerMapper {
 
-    public static final Path CONTEXT_PATH = Path.of("customerContext.json");
-    public static final String CONTEXT_ERROR_MESSAGE = "Error processing context: ";
+    public static final URI NO_CONTEXT = null;
+    public static URI context;
+
+    static {
+        context = URI.create("https://bibsysdev.github.io/src/customer-context.json");
+    }
 
     private final ObjectMapper objectMapper;
     private final String namespace;
@@ -34,7 +34,7 @@ public class CustomerMapper {
         CustomerDto customerDto = objectMapper.convertValue(customerDb, CustomerDto.class);
         URI id = toId(customerDb.getIdentifier());
         customerDto.setId(id);
-        customerDto.setContext(getContext());
+        customerDto.setContext(context);
         return customerDto;
     }
 
@@ -46,7 +46,7 @@ public class CustomerMapper {
      */
     public CustomerDto toCustomerDtoWithoutContext(CustomerDb customerDb) {
         CustomerDto customerDto = toCustomerDto(customerDb);
-        customerDto.setContext(null);
+        customerDto.setContext(NO_CONTEXT);
         return customerDto;
     }
 
@@ -61,7 +61,7 @@ public class CustomerMapper {
             .map(this::toCustomerDtoWithoutContext)
             .collect(Collectors.toList()
             );
-        return CustomerList.of(getContext(), customerDtos);
+        return CustomerList.of(customerDtos);
     }
 
     /**
@@ -77,14 +77,6 @@ public class CustomerMapper {
 
     private URI toId(UUID identifier) {
         return URI.create(namespace + "/" + identifier);
-    }
-
-    private JsonNode getContext() {
-        try {
-            return objectMapper.readTree(IoUtils.inputStreamFromResources(CONTEXT_PATH));
-        } catch (IOException e) {
-            throw new IllegalStateException(CONTEXT_ERROR_MESSAGE + CONTEXT_PATH.toString(), e);
-        }
     }
 
 }
