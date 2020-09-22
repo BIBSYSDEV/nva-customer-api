@@ -19,7 +19,8 @@ public class CustomerMapper {
 
     public CustomerDto toCustomerDto(CustomerDb customerDb) {
         CustomerDto customerDto = objectMapper.convertValue(customerDb, CustomerDto.class);
-        customerDto.setId(toId(customerDb.getIdentifier()));
+        URI id = toId(customerDb.getIdentifier());
+        customerDto.setId(id);
         customerDto.setContext(objectMapper.createObjectNode());
         return customerDto;
     }

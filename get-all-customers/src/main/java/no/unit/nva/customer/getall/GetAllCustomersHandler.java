@@ -33,13 +33,17 @@ public class GetAllCustomersHandler extends ApiGatewayHandler<Void, CustomerList
      */
     @JacocoGenerated
     public GetAllCustomersHandler() {
-        this(new DynamoDBCustomerService(
-                AmazonDynamoDBClientBuilder.defaultClient(),
-                ObjectMapperConfig.objectMapper,
-                new Environment()
-            ),
+        this(defaultDynamoDBCustomerService(new Environment()),
             defaultCustomerMapper(new Environment()),
             new Environment());
+    }
+
+    @JacocoGenerated
+    private static DynamoDBCustomerService defaultDynamoDBCustomerService(Environment environment) {
+        return new DynamoDBCustomerService(
+            AmazonDynamoDBClientBuilder.defaultClient(),
+            ObjectMapperConfig.objectMapper,
+            environment);
     }
 
     private static CustomerMapper defaultCustomerMapper(Environment environment) {

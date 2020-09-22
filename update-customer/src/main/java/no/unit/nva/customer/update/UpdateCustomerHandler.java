@@ -5,6 +5,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
 import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -18,11 +20,13 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UpdateCustomerHandler extends ApiGatewayHandler<CustomerDb, CustomerDb> {
+public class UpdateCustomerHandler extends ApiGatewayHandler<CustomerDto, CustomerDto> {
 
+    public static final String ID_NAMESPACE_ENV = "ID_NAMESPACE";
     public static final String IDENTIFIER = "identifier";
     public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
 
+    private final CustomerMapper customerMapper;
     private final CustomerService customerService;
     private static final Logger logger = LoggerFactory.getLogger(UpdateCustomerHandler.class);
 
@@ -34,9 +38,13 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<CustomerDb, Custome
 
     @JacocoGenerated
     public UpdateCustomerHandler(Environment environment) {
-        this(defaultDynamoDBCustomerService(environment), environment);
+        this(defaultDynamoDBCustomerService(environment), defaultCustomerMapper(environment), environment);
     }
 
+    private static CustomerMapper defaultCustomerMapper(Environment environment) {
+        String namespace = environment.readEnv(ID_NAMESPACE_ENV);
+        return new CustomerMapper(namespace);
+    }
 
     @JacocoGenerated
     private static DynamoDBCustomerService defaultDynamoDBCustomerService(Environment environment) {
@@ -52,15 +60,19 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<CustomerDb, Custome
      * @param customerService customerService
      * @param environment   environment
      */
-    public UpdateCustomerHandler(CustomerService customerService, Environment environment) {
-        super(CustomerDb.class, environment, logger);
+    public UpdateCustomerHandler(CustomerService customerService, CustomerMapper customerMapper, Environment environment) {
+        super(CustomerDto.class, environment, logger);
         this.customerService = customerService;
+        this.customerMapper = customerMapper;
     }
 
     @Override
-    protected CustomerDb processInput(CustomerDb input, RequestInfo requestInfo, Context context)
+    protected CustomerDto processInput(CustomerDto input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        return customerService.updateCustomer(getIdentifier(requestInfo), input);
+        CustomerDb customerDb = customerMapper.toCustomerDb(input);
+        UUID identifier = getIdentifier(requestInfo);
+        CustomerDb updatedCustomerDb = customerService.updateCustomer(identifier, customerDb);
+        return  customerMapper.toCustomerDto(updatedCustomerDb);
     }
 
     protected UUID getIdentifier(RequestInfo requestInfo) throws ApiGatewayException {
@@ -74,7 +86,7 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<CustomerDb, Custome
     }
 
     @Override
-    protected Integer getSuccessStatusCode(CustomerDb input, CustomerDb output) {
+    protected Integer getSuccessStatusCode(CustomerDto input, CustomerDto output) {
         return HttpStatus.SC_OK;
     }
 }
