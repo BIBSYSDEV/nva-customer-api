@@ -10,18 +10,13 @@ import nva.commons.utils.JsonUtils;
 public class CustomerMapper {
 
     public static final URI NO_CONTEXT = null;
-    public static URI context;
+    public static final URI context = URI.create("https://bibsysdev.github.io/src/customer-context.json");
+    private static final ObjectMapper objectMapper = JsonUtils.objectMapper;
 
-    static {
-        context = URI.create("https://bibsysdev.github.io/src/customer-context.json");
-    }
-
-    private final ObjectMapper objectMapper;
     private final String namespace;
 
     public CustomerMapper(String namespace) {
         this.namespace = namespace;
-        objectMapper = JsonUtils.objectMapper;
     }
 
     /**
