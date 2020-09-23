@@ -31,7 +31,7 @@ import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.DynamoDBException;
 import no.unit.nva.customer.exception.InputException;
 import no.unit.nva.customer.exception.NotFoundException;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import nva.commons.utils.Environment;
 import org.hamcrest.MatcherAssert;
@@ -80,8 +80,8 @@ public class DynamoDBCustomerServiceTest {
 
     @Test
     public void createNewCustomerReturnsTheCustomer() throws Exception {
-        Customer customer = getNewCustomer();
-        Customer createdCustomer = service.createCustomer(customer);
+        CustomerDb customer = getNewCustomer();
+        CustomerDb createdCustomer = service.createCustomer(customer);
 
         assertNotNull(createdCustomer.getIdentifier());
         assertEquals(customer, createdCustomer);
@@ -90,37 +90,37 @@ public class DynamoDBCustomerServiceTest {
     @Test
     public void updateExistingCustomerWithNewName() throws Exception {
         String newName = "New name";
-        Customer customer = getNewCustomer();
-        Customer createdCustomer = service.createCustomer(customer);
+        CustomerDb customer = getNewCustomer();
+        CustomerDb createdCustomer = service.createCustomer(customer);
         assertNotEquals(newName, createdCustomer.getName());
 
         createdCustomer.setName(newName);
-        Customer updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
+        CustomerDb updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
         assertEquals(newName, updatedCustomer.getName());
     }
 
     @Test
     public void updateExistingCustomerChangesModifiedDate() throws Exception {
-        Customer customer = getNewCustomer();
-        Customer createdCustomer = service.createCustomer(customer);
+        CustomerDb customer = getNewCustomer();
+        CustomerDb createdCustomer = service.createCustomer(customer);
 
-        Customer updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
+        CustomerDb updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
         assertNotEquals(customer.getModifiedDate(), updatedCustomer.getModifiedDate());
     }
 
     @Test
     public void updateExistingCustomerPreservesCreatedDate() throws Exception {
-        Customer customer = getNewCustomer();
-        Customer createdCustomer = service.createCustomer(customer);
+        CustomerDb customer = getNewCustomer();
+        CustomerDb createdCustomer = service.createCustomer(customer);
 
-        Customer updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
+        CustomerDb updatedCustomer = service.updateCustomer(createdCustomer.getIdentifier(), createdCustomer);
         assertEquals(customer.getCreatedDate(), updatedCustomer.getCreatedDate());
     }
 
     @Test
     public void updateExistingCustomerWithDifferentIdentifiersThrowsException() throws Exception {
-        Customer customer = getNewCustomer();
-        Customer createdCustomer = service.createCustomer(customer);
+        CustomerDb customer = getNewCustomer();
+        CustomerDb createdCustomer = service.createCustomer(customer);
         UUID differentIdentifier = UUID.randomUUID();
 
         InputException exception = assertThrows(InputException.class,
@@ -132,25 +132,25 @@ public class DynamoDBCustomerServiceTest {
 
     @Test
     public void getExistingCustomerReturnsTheCustomer() throws Exception {
-        Customer customer = getNewCustomer();
-        Customer createdCustomer = service.createCustomer(customer);
-        Customer getCustomer = service.getCustomer(createdCustomer.getIdentifier());
+        CustomerDb customer = getNewCustomer();
+        CustomerDb createdCustomer = service.createCustomer(customer);
+        CustomerDb getCustomer = service.getCustomer(createdCustomer.getIdentifier());
         assertEquals(createdCustomer, getCustomer);
     }
 
     @Test
     public void getCustomerByOrgNumberReturnsTheCustomer() throws Exception {
-        Customer customer = getNewCustomer();
-        Customer createdCustomer = service.createCustomer(customer);
-        Customer getCustomer = service.getCustomerByOrgNumber(createdCustomer.getFeideOrganizationId());
+        CustomerDb customer = getNewCustomer();
+        CustomerDb createdCustomer = service.createCustomer(customer);
+        CustomerDb getCustomer = service.getCustomerByOrgNumber(createdCustomer.getFeideOrganizationId());
         assertEquals(createdCustomer, getCustomer);
     }
 
     @Test
     public void getCustomerByCristinIdReturnsTheCustomer() throws Exception {
-        Customer customer = getNewCustomer();
-        Customer createdCustomer = service.createCustomer(customer);
-        Customer getCustomer = service.getCustomerByCristinId(createdCustomer.getCristinId());
+        CustomerDb customer = getNewCustomer();
+        CustomerDb createdCustomer = service.createCustomer(customer);
+        CustomerDb getCustomer = service.getCustomerByCristinId(createdCustomer.getCristinId());
         assertEquals(createdCustomer, getCustomer);
     }
 
@@ -161,7 +161,7 @@ public class DynamoDBCustomerServiceTest {
         service.createCustomer(getNewCustomer());
         service.createCustomer(getNewCustomer());
 
-        List<Customer> customers = service.getCustomers();
+        List<CustomerDb> customers = service.getCustomers();
         assertEquals(3, customers.size());
     }
 
@@ -229,7 +229,7 @@ public class DynamoDBCustomerServiceTest {
                 getByOrgNumberIndex(),
                 getByCristinIdIndex()
         );
-        Customer customer = getNewCustomer();
+        CustomerDb customer = getNewCustomer();
         customer.setIdentifier(UUID.randomUUID());
         DynamoDBException exception = assertThrows(DynamoDBException.class,
             () -> failingService.updateCustomer(customer.getIdentifier(), customer));
@@ -239,7 +239,7 @@ public class DynamoDBCustomerServiceTest {
     @Test
     public void customerToItemThrowsExceptionWhenInvalidJson() throws JsonProcessingException {
         ObjectMapper failingObjectMapper = mock(ObjectMapper.class);
-        when(failingObjectMapper.writeValueAsString(any(Customer.class))).thenThrow(JsonProcessingException.class);
+        when(failingObjectMapper.writeValueAsString(any(CustomerDb.class))).thenThrow(JsonProcessingException.class);
         DynamoDBCustomerService failingService = new DynamoDBCustomerService(
                 failingObjectMapper,
                 db.getTable(),
@@ -261,9 +261,9 @@ public class DynamoDBCustomerServiceTest {
 
     }
 
-    private Customer getNewCustomer() {
+    private CustomerDb getNewCustomer() {
         Instant oneMinuteInThePast = Instant.now().minusSeconds(60L);
-        return new Customer.Builder()
+        return new CustomerDb.Builder()
                 .withName("Name")
                 .withShortName("SN")
                 .withCreatedDate(oneMinuteInThePast)

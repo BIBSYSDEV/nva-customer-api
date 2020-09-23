@@ -292,6 +292,9 @@ Resources:
           Customer:
             type: object
             properties:
+              id:
+                type: string
+                format: uri
               identifier:
                 type: string
                 format: uuid
@@ -320,6 +323,8 @@ Resources:
               cristinId:
                 type: string
                 format: uri
+              '@context':
+                type: object
           Problem:
             type: object
             properties:
@@ -352,6 +357,10 @@ Resources:
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
+          ID_NAMESPACE: !Sub
+            - "http://${Domain}/${Path}"
+            - Domain: !Ref CustomDomain
+              Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -375,6 +384,10 @@ Resources:
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
+          ID_NAMESPACE: !Sub
+            - "http://${Domain}/${Path}"
+            - Domain: !Ref CustomDomain
+              Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -398,9 +411,10 @@ Resources:
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
-          API_SCHEME: https
-          API_HOST: !Ref CustomDomain
-          API_BASE_PATH: !Ref CustomDomainBasePath
+          ID_NAMESPACE: !Sub
+            - "http://${Domain}/${Path}"
+            - Domain: !Ref CustomDomain
+              Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -424,6 +438,10 @@ Resources:
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
+          ID_NAMESPACE: !Sub
+            - "http://${Domain}/${Path}"
+            - Domain: !Ref CustomDomain
+              Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -447,6 +465,10 @@ Resources:
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
+          ID_NAMESPACE: !Sub
+            - "http://${Domain}/${Path}"
+            - Domain: !Ref CustomDomain
+              Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName
@@ -470,6 +492,10 @@ Resources:
           TABLE_NAME: !Ref CustomersTableName
           BY_ORG_NUMBER_INDEX_NAME: !Ref CustomersByOrgNumberIndexName
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
+          ID_NAMESPACE: !Sub
+            - "http://${Domain}/${Path}"
+            - Domain: !Ref CustomDomain
+              Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CustomersTableName

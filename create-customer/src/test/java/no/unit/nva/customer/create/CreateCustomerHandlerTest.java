@@ -3,7 +3,9 @@ package no.unit.nva.customer.create;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.unit.nva.customer.ObjectMapperConfig;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.testutils.HandlerRequestBuilder;
 import nva.commons.handlers.GatewayResponse;
@@ -26,8 +28,10 @@ import static org.mockito.Mockito.when;
 public class CreateCustomerHandlerTest {
 
     public static final String WILDCARD = "*";
+    public static final String SAMPLE_NAMESPACE = "http://example.org/customer";
 
     private ObjectMapper objectMapper = ObjectMapperConfig.objectMapper;
+    private CustomerMapper customerMapper;
     private CustomerService customerServiceMock;
     private Environment environmentMock;
     private CreateCustomerHandler handler;
@@ -42,8 +46,9 @@ public class CreateCustomerHandlerTest {
     public void setUp() {
         customerServiceMock = mock(CustomerService.class);
         environmentMock = mock(Environment.class);
+        customerMapper = new CustomerMapper(SAMPLE_NAMESPACE);
         when(environmentMock.readEnv(ALLOWED_ORIGIN_ENV)).thenReturn(WILDCARD);
-        handler = new CreateCustomerHandler(customerServiceMock, environmentMock);
+        handler = new CreateCustomerHandler(customerServiceMock, customerMapper, environmentMock);
         outputStream = new ByteArrayOutputStream();
         context = Mockito.mock(Context.class);
     }
@@ -51,23 +56,23 @@ public class CreateCustomerHandlerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void requestToHandlerReturnsCustomerCreated() throws Exception {
-        Customer customer = new Customer.Builder()
+        CustomerDb customerDb = new CustomerDb.Builder()
                 .withName("New Customer")
                 .build();
-        when(customerServiceMock.createCustomer(customer)).thenReturn(customer);
+        when(customerServiceMock.createCustomer(customerDb)).thenReturn(customerDb);
 
-        InputStream inputStream = new HandlerRequestBuilder<Customer>(objectMapper)
-            .withBody(customer)
+        InputStream inputStream = new HandlerRequestBuilder<CustomerDb>(objectMapper)
+            .withBody(customerDb)
             .withHeaders(getRequestHeaders())
             .build();
         handler.handleRequest(inputStream, outputStream, context);
 
-        GatewayResponse<Customer> actual = objectMapper.readValue(
+        GatewayResponse<CustomerDto> actual = objectMapper.readValue(
                 outputStream.toByteArray(),
                 GatewayResponse.class);
 
-        GatewayResponse<Customer> expected = new GatewayResponse<>(
-                customer,
+        GatewayResponse<CustomerDto> expected = new GatewayResponse<>(
+                customerMapper.toCustomerDto(customerDb),
                 getResponseHeaders(),
                 HttpStatus.SC_CREATED
         );

@@ -4,7 +4,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -17,11 +19,13 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Customer> {
+public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, CustomerDto> {
 
+    public static final String ID_NAMESPACE_ENV = "ID_NAMESPACE";
     public static final String CRISTIN_ID = "cristinId";
 
     private final CustomerService customerService;
+    private final CustomerMapper customerMapper;
     private static final Logger logger = LoggerFactory.getLogger(GetCustomerByCristinIdHandler.class);
 
     /**
@@ -29,7 +33,10 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
      */
     @JacocoGenerated
     public GetCustomerByCristinIdHandler() {
-        this(defaultCustomerService(), new Environment());
+        this(defaultCustomerService(),
+            defaultCustomerMapper(),
+            new Environment()
+        );
     }
 
     @JacocoGenerated
@@ -37,8 +44,13 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
         return new DynamoDBCustomerService(
             AmazonDynamoDBClientBuilder.defaultClient(),
             ObjectMapperConfig.objectMapper,
-            new Environment()
-        );
+            new Environment());
+    }
+
+    @JacocoGenerated
+    private static CustomerMapper defaultCustomerMapper() {
+        String namespace = new Environment().readEnv(ID_NAMESPACE_ENV);
+        return new CustomerMapper(namespace);
     }
 
     /**
@@ -47,18 +59,23 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
      * @param customerService customerService
      * @param environment   environment
      */
-    public GetCustomerByCristinIdHandler(CustomerService customerService, Environment environment) {
+    public GetCustomerByCristinIdHandler(
+        CustomerService customerService,
+        CustomerMapper customerMapper,
+        Environment environment) {
         super(Void.class, environment, logger);
         this.customerService = customerService;
+        this.customerMapper = customerMapper;
+
     }
 
     @Override
-    protected Customer processInput(Void input, RequestInfo requestInfo, Context context)
+    protected CustomerDto processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
         String cristinId = getCristinId(requestInfo);
-        Customer customer = customerService.getCustomerByCristinId(cristinId);
+        CustomerDb customerDb = customerService.getCustomerByCristinId(cristinId);
 
-        return customer;
+        return customerMapper.toCustomerDto(customerDb);
     }
 
     private String getCristinId(RequestInfo requestInfo) throws InputException {
@@ -70,7 +87,7 @@ public class GetCustomerByCristinIdHandler extends ApiGatewayHandler<Void, Custo
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Void input, Customer output) {
+    protected Integer getSuccessStatusCode(Void input, CustomerDto output) {
         return HttpStatus.SC_OK;
     }
 }
