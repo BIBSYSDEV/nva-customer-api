@@ -36,12 +36,15 @@ Parameters:
   CustomersTableName:
     Type: String
     Description: Reference to table containing Customers
+    Default: nva_customers
   CustomersByOrgNumberIndexName:
     Type: String
     Description: Reference to index containing Customers by org number
+    Default: byOrgNumber
   CustomersByCristinIdIndexName:
     Type: String
     Description: Reference to index containing Customers by cristin id
+    Default: byCristinId
 
 Resources:
   ApiAccessLogGroup:
@@ -516,3 +519,34 @@ Resources:
       DomainName: !Ref CustomDomain
       RestApiId: !Ref NvaCustomerApi
       Stage: !Ref NvaCustomerApi.Stage
+
+  NvaCustomersTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Ref CustomersTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: identifier
+          AttributeType: S
+        - AttributeName: feideOrganizationId
+          AttributeType: S
+        - AttributeName: cristinId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: identifier
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: !Ref CustomersByOrgNumberIndexName
+          KeySchema:
+            - AttributeName: feideOrganizationId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: !Ref CustomersByCristinIdIndexName
+          KeySchema:
+            - AttributeName: cristinId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
