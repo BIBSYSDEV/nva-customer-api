@@ -4,7 +4,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import no.unit.nva.customer.ObjectMapperConfig;
 import no.unit.nva.customer.exception.InputException;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
+import no.unit.nva.customer.model.CustomerDto;
+import no.unit.nva.customer.model.CustomerMapper;
 import no.unit.nva.customer.service.CustomerService;
 import no.unit.nva.customer.service.impl.DynamoDBCustomerService;
 import nva.commons.exceptions.ApiGatewayException;
@@ -18,32 +20,39 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> {
+public class UpdateCustomerHandler extends ApiGatewayHandler<CustomerDto, CustomerDto> {
 
+    public static final String ID_NAMESPACE_ENV = "ID_NAMESPACE";
     public static final String IDENTIFIER = "identifier";
     public static final String IDENTIFIER_IS_NOT_A_VALID_UUID = "Identifier is not a valid UUID: ";
 
+    private final CustomerMapper customerMapper;
     private final CustomerService customerService;
     private static final Logger logger = LoggerFactory.getLogger(UpdateCustomerHandler.class);
 
-
+    /**
+     * Default Constructor for UpdateCustomerHandler.
+     */
     @JacocoGenerated
     public UpdateCustomerHandler() {
-        this(new Environment());
+        this(defaultCustomerService(),
+            defaultCustomerMapper(),
+            new Environment()
+        );
     }
 
     @JacocoGenerated
-    public UpdateCustomerHandler(Environment environment) {
-        this(defaultDynamoDBCustomerService(environment), environment);
-    }
-
-
-    @JacocoGenerated
-    private static DynamoDBCustomerService defaultDynamoDBCustomerService(Environment environment) {
+    private static DynamoDBCustomerService defaultCustomerService() {
         return new DynamoDBCustomerService(
             AmazonDynamoDBClientBuilder.defaultClient(),
             ObjectMapperConfig.objectMapper,
-            environment);
+            new Environment());
+    }
+
+    @JacocoGenerated
+    private static CustomerMapper defaultCustomerMapper() {
+        String namespace = new Environment().readEnv(ID_NAMESPACE_ENV);
+        return new CustomerMapper(namespace);
     }
 
     /**
@@ -52,15 +61,22 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> 
      * @param customerService customerService
      * @param environment   environment
      */
-    public UpdateCustomerHandler(CustomerService customerService, Environment environment) {
-        super(Customer.class, environment, logger);
+    public UpdateCustomerHandler(
+        CustomerService customerService,
+        CustomerMapper customerMapper,
+        Environment environment) {
+        super(CustomerDto.class, environment, logger);
         this.customerService = customerService;
+        this.customerMapper = customerMapper;
     }
 
     @Override
-    protected Customer processInput(Customer input, RequestInfo requestInfo, Context context)
+    protected CustomerDto processInput(CustomerDto input, RequestInfo requestInfo, Context context)
             throws ApiGatewayException {
-        return customerService.updateCustomer(getIdentifier(requestInfo), input);
+        CustomerDb customerDb = customerMapper.toCustomerDb(input);
+        UUID identifier = getIdentifier(requestInfo);
+        CustomerDb updatedCustomerDb = customerService.updateCustomer(identifier, customerDb);
+        return  customerMapper.toCustomerDto(updatedCustomerDb);
     }
 
     protected UUID getIdentifier(RequestInfo requestInfo) throws ApiGatewayException {
@@ -74,7 +90,7 @@ public class UpdateCustomerHandler extends ApiGatewayHandler<Customer,Customer> 
     }
 
     @Override
-    protected Integer getSuccessStatusCode(Customer input, Customer output) {
+    protected Integer getSuccessStatusCode(CustomerDto input, CustomerDto output) {
         return HttpStatus.SC_OK;
     }
 }

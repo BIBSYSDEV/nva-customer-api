@@ -1,14 +1,15 @@
 package no.unit.nva.customer.model;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import no.unit.nva.customer.model.interfaces.Customer;
 import nva.commons.utils.JacocoGenerated;
 
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-public class Customer {
+@JsonTypeName("Customer")
+public class CustomerDb implements Customer {
 
     public static final String IDENTIFIER = "identifier";
     public static final String ORG_NUMBER = "feideOrganizationId";
@@ -26,10 +27,10 @@ public class Customer {
     private String feideOrganizationId;
     private String cristinId;
 
-    public Customer() {
+    public CustomerDb() {
     }
 
-    private Customer(Builder builder) {
+    private CustomerDb(Builder builder) {
         setIdentifier(builder.identifier);
         setCreatedDate(builder.createdDate);
         setModifiedDate(builder.modifiedDate);
@@ -43,91 +44,112 @@ public class Customer {
         setCristinId(builder.cristinId);
     }
 
+    @Override
     public UUID getIdentifier() {
         return identifier;
     }
 
+    @Override
     public void setIdentifier(UUID identifier) {
         this.identifier = identifier;
     }
 
+    @Override
     public Instant getCreatedDate() {
         return createdDate;
     }
 
+    @Override
     public void setCreatedDate(Instant createdDate) {
         this.createdDate = createdDate;
     }
 
+    @Override
     public Instant getModifiedDate() {
         return modifiedDate;
     }
 
+    @Override
     public void setModifiedDate(Instant modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
+    @Override
     public String getShortName() {
         return shortName;
     }
 
+    @Override
     public void setShortName(String shortName) {
         this.shortName = shortName;
     }
 
+    @Override
     public String getArchiveName() {
         return archiveName;
     }
 
+    @Override
     public void setArchiveName(String archiveName) {
         this.archiveName = archiveName;
     }
 
+    @Override
     public String getCname() {
         return cname;
     }
 
+    @Override
     public void setCname(String cname) {
         this.cname = cname;
     }
 
+    @Override
     public String getInstitutionDns() {
         return institutionDns;
     }
 
+    @Override
     public void setInstitutionDns(String institutionDns) {
         this.institutionDns = institutionDns;
     }
 
-
+    @Override
     public String getFeideOrganizationId() {
         return feideOrganizationId;
     }
 
+    @Override
     public void setFeideOrganizationId(String feideOrganizationId) {
         this.feideOrganizationId = feideOrganizationId;
     }
 
+    @Override
     public String getCristinId() {
         return cristinId;
     }
 
+    @Override
     public void setCristinId(String cristinId) {
         this.cristinId = cristinId;
     }
@@ -141,7 +163,7 @@ public class Customer {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Customer that = (Customer) o;
+        CustomerDb that = (CustomerDb) o;
         return Objects.equals(getIdentifier(), that.getIdentifier())
                 && Objects.equals(getCreatedDate(), that.getCreatedDate())
                 && Objects.equals(getModifiedDate(), that.getModifiedDate())
@@ -235,8 +257,8 @@ public class Customer {
             return this;
         }
 
-        public Customer build() {
-            return new Customer(this);
+        public CustomerDb build() {
+            return new CustomerDb(this);
         }
     }
 }

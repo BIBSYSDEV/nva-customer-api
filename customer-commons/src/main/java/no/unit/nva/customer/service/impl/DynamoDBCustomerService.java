@@ -22,7 +22,7 @@ import java.util.UUID;
 import no.unit.nva.customer.exception.DynamoDBException;
 import no.unit.nva.customer.exception.InputException;
 import no.unit.nva.customer.exception.NotFoundException;
-import no.unit.nva.customer.model.Customer;
+import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.utils.Environment;
@@ -84,25 +84,25 @@ public class DynamoDBCustomerService implements CustomerService {
     }
 
     @Override
-    public Customer getCustomer(UUID identifier) throws ApiGatewayException {
-        Item item = fetchItemFromQueryable(table, Customer.IDENTIFIER, identifier.toString());
+    public CustomerDb getCustomer(UUID identifier) throws ApiGatewayException {
+        Item item = fetchItemFromQueryable(table, CustomerDb.IDENTIFIER, identifier.toString());
         return itemToCustomer(item);
     }
 
     @Override
-    public Customer getCustomerByCristinId(String cristinId) throws ApiGatewayException {
-        Item item = fetchItemFromQueryable(byCristinIdIndex, Customer.CRISTIN_ID, cristinId);
+    public CustomerDb getCustomerByCristinId(String cristinId) throws ApiGatewayException {
+        Item item = fetchItemFromQueryable(byCristinIdIndex, CustomerDb.CRISTIN_ID, cristinId);
         return itemToCustomer(item);
     }
 
     @Override
-    public Customer getCustomerByOrgNumber(String orgNumber) throws ApiGatewayException {
-        Item item = fetchItemFromQueryable(byOrgNumberIndex, Customer.ORG_NUMBER, orgNumber);
+    public CustomerDb getCustomerByOrgNumber(String orgNumber) throws ApiGatewayException {
+        Item item = fetchItemFromQueryable(byOrgNumberIndex, CustomerDb.ORG_NUMBER, orgNumber);
         return itemToCustomer(item);
     }
 
     @Override
-    public List<Customer> getCustomers() throws ApiGatewayException {
+    public List<CustomerDb> getCustomers() throws ApiGatewayException {
         ItemCollection<ScanOutcome> scan;
         try {
             scan = table.scan();
@@ -112,8 +112,8 @@ public class DynamoDBCustomerService implements CustomerService {
         return scanToCustomers(scan);
     }
 
-    protected List<Customer> scanToCustomers(ItemCollection<ScanOutcome> scan) throws DynamoDBException {
-        List<Customer> customers = new ArrayList<>();
+    protected List<CustomerDb> scanToCustomers(ItemCollection<ScanOutcome> scan) throws DynamoDBException {
+        List<CustomerDb> customers = new ArrayList<>();
         for (Item item: scan) {
             customers.add(itemToCustomer(item));
         }
@@ -121,10 +121,13 @@ public class DynamoDBCustomerService implements CustomerService {
     }
 
     @Override
-    public Customer createCustomer(Customer customer) throws ApiGatewayException {
+    public CustomerDb createCustomer(CustomerDb customer) throws ApiGatewayException {
         UUID identifier = UUID.randomUUID();
+        Instant now = Instant.now();
         try {
             customer.setIdentifier(identifier);
+            customer.setCreatedDate(now);
+            customer.setModifiedDate(now);
             table.putItem(customerToItem(customer));
         } catch (Exception e) {
             throw new DynamoDBException(ERROR_WRITING_ITEM_TO_TABLE, e);
@@ -133,7 +136,7 @@ public class DynamoDBCustomerService implements CustomerService {
     }
 
     @Override
-    public Customer updateCustomer(UUID identifier, Customer customer) throws ApiGatewayException {
+    public CustomerDb updateCustomer(UUID identifier, CustomerDb customer) throws ApiGatewayException {
         validateIdentifier(identifier, customer);
         try {
             customer.setModifiedDate(Instant.now());
@@ -145,13 +148,13 @@ public class DynamoDBCustomerService implements CustomerService {
         return getCustomer(identifier);
     }
 
-    private void validateIdentifier(UUID identifier, Customer customer) throws InputException {
+    private void validateIdentifier(UUID identifier, CustomerDb customer) throws InputException {
         if (!identifier.equals(customer.getIdentifier())) {
             throw new InputException(String.format(IDENTIFIERS_NOT_EQUAL, identifier, customer.getIdentifier()), null);
         }
     }
 
-    protected Item customerToItem(Customer customer) throws InputException {
+    protected Item customerToItem(CustomerDb customer) throws InputException {
         Item item;
         try {
             item = Item.fromJSON(objectMapper.writeValueAsString(customer));
@@ -161,10 +164,10 @@ public class DynamoDBCustomerService implements CustomerService {
         return item;
     }
 
-    protected Customer itemToCustomer(Item item) throws DynamoDBException {
-        Customer customerOutcome;
+    protected CustomerDb itemToCustomer(Item item) throws DynamoDBException {
+        CustomerDb customerOutcome;
         try {
-            customerOutcome = objectMapper.readValue(item.toJSON(), Customer.class);
+            customerOutcome = objectMapper.readValue(item.toJSON(), CustomerDb.class);
         } catch (Exception e) {
             throw new DynamoDBException(ERROR_MAPPING_ITEM_TO_CUSTOMER, e);
         }
