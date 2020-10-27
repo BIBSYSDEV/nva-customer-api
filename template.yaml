@@ -220,7 +220,7 @@ Resources:
                   description: OrgNumber of the CustomerIdentifiers to get.
               x-amazon-apigateway-integration:
                 uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}:live/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}/invocations
                 responses: {}
                 httpMethod: POST
                 type: AWS_PROXY
