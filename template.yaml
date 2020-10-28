@@ -406,7 +406,7 @@ Resources:
       Runtime: java11
       MemorySize: 1408
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 3
+        ProvisionedConcurrentExecutions: 2
       AutoPublishAlias: live
       Environment:
         Variables:
