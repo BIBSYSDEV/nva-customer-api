@@ -42,6 +42,14 @@ Parameters:
   CustomersByCristinIdIndexName:
     Type: String
     Description: Reference to index containing Customers by cristin id
+  MaxConcurrency:
+    Type: String
+    Description: Maximum capacity for provisioned concurrency
+    Default: 10
+  MinConcurrency:
+    Type: String
+    Description: Minimum capacity for provisioned concurrency
+    Default: 1
 
 Resources:
   ApiAccessLogGroup:
@@ -220,7 +228,7 @@ Resources:
                   description: OrgNumber of the CustomerIdentifiers to get.
               x-amazon-apigateway-integration:
                 uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}:live/invocations
                 responses: {}
                 httpMethod: POST
                 type: AWS_PROXY
@@ -515,8 +523,8 @@ Resources:
   NvaGetCustomerByOrgNumberScalableTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:
-      MaxCapacity: 10
-      MinCapacity: 1
+      MaxCapacity: !Ref MaxConcurrency
+      MinCapacity: !Ref MinConcurrency
       ResourceId: !Sub function:${NvaGetCustomerByOrgNumberFunction}:live
       RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/lambda.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_LambdaConcurrency
       ScalableDimension: lambda:function:ProvisionedConcurrency
