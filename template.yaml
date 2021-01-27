@@ -42,6 +42,14 @@ Parameters:
   CustomersByCristinIdIndexName:
     Type: String
     Description: Reference to index containing Customers by cristin id
+  MaxConcurrency:
+    Type: String
+    Description: Maximum capacity for provisioned concurrency
+    Default: 10
+  MinConcurrency:
+    Type: String
+    Description: Minimum capacity for provisioned concurrency
+    Default: 1
 
 Resources:
   ApiAccessLogGroup:
@@ -220,7 +228,7 @@ Resources:
                   description: OrgNumber of the CustomerIdentifiers to get.
               x-amazon-apigateway-integration:
                 uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NvaGetCustomerByOrgNumberFunction.Arn}:live/invocations
                 responses: {}
                 httpMethod: POST
                 type: AWS_PROXY
@@ -405,9 +413,11 @@ Resources:
       Handler: no.unit.nva.customer.get.GetCustomerByOrgNumberHandler::handleRequest
       Runtime: java11
       MemorySize: 1408
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 3
       AutoPublishAlias: live
+      DeploymentPreference:
+        Type: AllAtOnce
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 1
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
@@ -509,6 +519,29 @@ Resources:
             Path: /{identifier}
             Method: put
             RestApiId: !Ref NvaCustomerApi
+
+  NvaGetCustomerByOrgNumberScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: !Ref MaxConcurrency
+      MinCapacity: !Ref MinConcurrency
+      ResourceId: !Sub function:${NvaGetCustomerByOrgNumberFunction}:live
+      RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/lambda.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_LambdaConcurrency
+      ScalableDimension: lambda:function:ProvisionedConcurrency
+      ServiceNamespace: lambda
+    DependsOn: NvaGetCustomerByOrgNumberFunctionAliaslive
+
+  NvaGetCustomerByOrgNumberScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: utilization
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref NvaGetCustomerByOrgNumberScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 0.70
+        PredefinedMetricSpecification:
+          PredefinedMetricType: LambdaProvisionedConcurrencyUtilization
+
   NvaCustomerBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
