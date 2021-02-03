@@ -168,6 +168,7 @@ public class DynamoDBCustomerService implements CustomerService {
         return item;
     }
 
+    @SuppressWarnings("PMD.PrematureDeclaration")
     protected CustomerDb itemToCustomer(Item item) throws DynamoDBException {
         long start = System.currentTimeMillis();
         CustomerDb customerOutcome;
@@ -177,7 +178,7 @@ public class DynamoDBCustomerService implements CustomerService {
             throw new DynamoDBException(ERROR_MAPPING_ITEM_TO_CUSTOMER, e);
         }
         long stop = System.currentTimeMillis();
-        logger.info("itemToCustomer took {}} ms", stop-start);
+        logger.info("itemToCustomer took {}} ms", stop - start);
         return customerOutcome;
     }
 
@@ -189,7 +190,7 @@ public class DynamoDBCustomerService implements CustomerService {
             .map(this::fetchSingleItem)
             .orElseThrow(fail -> new DynamoDBException(ERROR_READING_FROM_TABLE, fail.getException()));
         long stop = System.currentTimeMillis();
-        logger.info("fetchItemFromQueryable took {}} ms", stop-start);
+        logger.info("fetchItemFromQueryable took {}} ms", stop - start);
         return queryResult.orElseThrow(() -> notFoundException(hashKeyValue));
     }
 

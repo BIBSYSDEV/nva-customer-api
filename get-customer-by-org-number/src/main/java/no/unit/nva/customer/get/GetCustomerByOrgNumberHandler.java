@@ -79,7 +79,7 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
         URI customerId = customerDto.getId();
         URI cristinId = URI.create(customerDb.getCristinId());
         long stop = System.currentTimeMillis();
-        logger.info("processInput took {} ms", stop-start);
+        logger.info("processInput took {} ms", stop - start);
         return new CustomerIdentifiers(customerId, cristinId);
     }
 
