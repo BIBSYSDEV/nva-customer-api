@@ -72,11 +72,14 @@ public class GetCustomerByOrgNumberHandler extends ApiGatewayHandler<Void, Custo
     @Override
     protected CustomerIdentifiers processInput(Void input, RequestInfo requestInfo, Context context)
         throws ApiGatewayException {
+        long start = System.currentTimeMillis();
         String orgNumber = getOrgNumber(requestInfo);
         CustomerDb customerDb = customerService.getCustomerByOrgNumber(orgNumber);
         CustomerDto customerDto = customerMapper.toCustomerDto(customerDb);
         URI customerId = customerDto.getId();
         URI cristinId = URI.create(customerDb.getCristinId());
+        long stop = System.currentTimeMillis();
+        logger.info("processInput took {} ms", stop-start);
         return new CustomerIdentifiers(customerId, cristinId);
     }
 
