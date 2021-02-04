@@ -26,6 +26,7 @@ subprojects {
     def junit5Version = '5.6.0'
     def jacksonVersion = '2.10.2'
     def awsSdkVersion = '1.11.714'
+    def awsSdk2Version = '2.4.0'
 
     dependencies {
         implementation group: 'com.github.BIBSYSDEV', name: 'nva-commons', version: '0.4.3'
@@ -37,6 +38,10 @@ subprojects {
         implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.0'
         implementation group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: awsSdkVersion
         implementation group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
+
+        implementation group: 'com.amazonaws', name: 'aws-xray-recorder-sdk-core', version: awsSdk2Version
+        implementation group: 'com.amazonaws', name: 'aws-xray-recorder-sdk-aws-sdk', version: awsSdk2Version
+        implementation group: 'com.amazonaws', name: 'aws-xray-recorder-sdk-aws-sdk-instrumentor', version: awsSdk2Version
 
         testImplementation group: 'com.github.BIBSYSDEV', name: 'nva-testutils', version: '0.1.13'
         testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.2.4'
