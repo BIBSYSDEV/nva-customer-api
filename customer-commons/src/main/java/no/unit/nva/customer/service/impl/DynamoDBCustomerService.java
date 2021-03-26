@@ -26,6 +26,8 @@ import no.unit.nva.customer.model.CustomerDb;
 import no.unit.nva.customer.service.CustomerService;
 import nva.commons.exceptions.ApiGatewayException;
 import nva.commons.utils.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DynamoDBCustomerService implements CustomerService {
 
@@ -39,6 +41,10 @@ public class DynamoDBCustomerService implements CustomerService {
     public static final String IDENTIFIERS_NOT_EQUAL = "Identifier in request parameters '%s' "
             + "is not equal to identifier in customer object '%s'";
     public static final String BY_CRISTIN_ID_INDEX_NAME = "BY_CRISTIN_ID_INDEX_NAME";
+
+    private static final Logger logger = LoggerFactory.getLogger(DynamoDBCustomerService.class);
+    public static final String DYNAMODB_WARMUP_PROBLEM = "There was a problem during describe table to warm up " +
+            "DynamoDB connection";
 
     private final Table table;
     private final Index byOrgNumberIndex;
@@ -64,6 +70,8 @@ public class DynamoDBCustomerService implements CustomerService {
         this.byOrgNumberIndex = table.getIndex(byOrgNumberIndexName);
         this.byCristinIdIndex = table.getIndex(byCristinIdIndexName);
         this.objectMapper = objectMapper;
+
+        warmupDynamoDbConnection(table);
     }
 
     /**
@@ -81,6 +89,16 @@ public class DynamoDBCustomerService implements CustomerService {
         this.byOrgNumberIndex = byOrgNumberIndex;
         this.byCristinIdIndex = byCristinIdIndex;
         this.objectMapper = objectMapper;
+
+        warmupDynamoDbConnection(table);
+    }
+
+    private void warmupDynamoDbConnection(Table table) {
+        try {
+            table.describe();
+        } catch (Exception e) {
+            logger.warn(DYNAMODB_WARMUP_PROBLEM, e);
+        }
     }
 
     @Override
@@ -164,23 +182,29 @@ public class DynamoDBCustomerService implements CustomerService {
         return item;
     }
 
+    @SuppressWarnings("PMD.PrematureDeclaration")
     protected CustomerDb itemToCustomer(Item item) throws DynamoDBException {
+        long start = System.currentTimeMillis();
         CustomerDb customerOutcome;
         try {
             customerOutcome = objectMapper.readValue(item.toJSON(), CustomerDb.class);
         } catch (Exception e) {
             throw new DynamoDBException(ERROR_MAPPING_ITEM_TO_CUSTOMER, e);
         }
+        long stop = System.currentTimeMillis();
+        logger.info("itemToCustomer took {} ms", stop - start);
         return customerOutcome;
     }
 
 
     private Item fetchItemFromQueryable(QueryApi index, String hashKeyName, String hashKeyValue)
         throws DynamoDBException, NotFoundException {
-
+        long start = System.currentTimeMillis();
         Optional<Item> queryResult = attempt(() -> index.query(hashKeyName, hashKeyValue))
             .map(this::fetchSingleItem)
             .orElseThrow(fail -> new DynamoDBException(ERROR_READING_FROM_TABLE, fail.getException()));
+        long stop = System.currentTimeMillis();
+        logger.info("fetchItemFromQueryable took {} ms", stop - start);
         return queryResult.orElseThrow(() -> notFoundException(hashKeyValue));
     }
 
