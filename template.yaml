@@ -25,11 +25,13 @@ Globals:
 
 Parameters:
   CognitoAuthorizerArn:
-    Type: String
+    Type: 'AWS::SSM::Parameter::Value<String>'
     Description: Reference to Cognito UserPool for the stage
+    Default: CognitoAuthorizerArn
   CustomDomain:
-    Type: String
+    Type: 'AWS::SSM::Parameter::Value<String>'
     Description: Custom API to connect this lambda to
+    Default: CustomDomain
   CustomDomainBasePath:
     Type: String
     Description: Base path mapping in CustomDomain
