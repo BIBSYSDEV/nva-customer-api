@@ -25,11 +25,13 @@ Globals:
 
 Parameters:
   CognitoAuthorizerArn:
-    Type: String
+    Type: 'AWS::SSM::Parameter::Value<String>'
     Description: Reference to Cognito UserPool for the stage
+    Default: CognitoAuthorizerArn
   CustomDomain:
-    Type: String
+    Type: 'AWS::SSM::Parameter::Value<String>'
     Description: Custom API to connect this lambda to
+    Default: CustomDomain
   CustomDomainBasePath:
     Type: String
     Description: Base path mapping in CustomDomain
@@ -367,7 +369,7 @@ Resources:
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
           ID_NAMESPACE: !Sub
             - "https://${Domain}/${Path}"
-            - Domain: !Ref CustomDomain
+            - Domain: !Sub api.${CustomDomain}
               Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
@@ -394,7 +396,7 @@ Resources:
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
           ID_NAMESPACE: !Sub
             - "https://${Domain}/${Path}"
-            - Domain: !Ref CustomDomain
+            - Domain: !Sub api.${CustomDomain}
               Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
@@ -426,7 +428,7 @@ Resources:
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
           ID_NAMESPACE: !Sub
             - "https://${Domain}/${Path}"
-            - Domain: !Ref CustomDomain
+            - Domain: !Sub api.${CustomDomain}
               Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
@@ -453,7 +455,7 @@ Resources:
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
           ID_NAMESPACE: !Sub
             - "https://${Domain}/${Path}"
-            - Domain: !Ref CustomDomain
+            - Domain: !Sub api.${CustomDomain}
               Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
@@ -480,7 +482,7 @@ Resources:
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
           ID_NAMESPACE: !Sub
             - "https://${Domain}/${Path}"
-            - Domain: !Ref CustomDomain
+            - Domain: !Sub api.${CustomDomain}
               Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
@@ -507,7 +509,7 @@ Resources:
           BY_CRISTIN_ID_INDEX_NAME: !Ref CustomersByCristinIdIndexName
           ID_NAMESPACE: !Sub
             - "https://${Domain}/${Path}"
-            - Domain: !Ref CustomDomain
+            - Domain: !Sub api.${CustomDomain}
               Path: !Ref CustomDomainBasePath
       Policies:
         - DynamoDBCrudPolicy:
@@ -546,6 +548,6 @@ Resources:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
       BasePath: !Ref CustomDomainBasePath
-      DomainName: !Ref CustomDomain
+      DomainName: !Sub api.${CustomDomain}
       RestApiId: !Ref NvaCustomerApi
       Stage: !Ref NvaCustomerApi.Stage
