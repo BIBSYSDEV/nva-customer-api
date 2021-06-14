@@ -1,3 +1,5 @@
+Functionality moved to: https://github.com/BIBSYSDEV/nva-identity-service
+
 # NVA Customer API
 API for administration of Institutions that are Customers in NVA.
 
